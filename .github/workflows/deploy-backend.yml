@@ -43,9 +43,8 @@ jobs:
 
     - name: Deploy and Restart via AWS SSM
       run: |
-        INSTANCE_ID="${{ secrets.EC2_INSTANCE_ID }}"
         aws ssm send-command \
           --document-name "AWS-RunShellScript" \
-          --targets "Key=InstanceIds,Values=$INSTANCE_ID" \ 
-          --parameters 'commands=["/usr/bin/aws s3 cp s3://${{ secrets.S3_BUCKET_ARTIFACTS }}/backend-builds/boutique-app-latest.jar /home/ubuntu/app/boutique-app.jar > /home/ubuntu/app/deploy.log 2>&1","sudo chown ubuntu:ubuntu /home/ubuntu/app/boutique-app.jar >> /home/ubuntu/app/deploy.log 2>&1","sudo systemctl restart boutique.service >> /home/ubuntu/app/deploy.log 2>&1"]' \
+          --targets '[{"Key":"InstanceIds","Values":["${{ secrets.EC2_INSTANCE_ID }}"]}]' \
+          --parameters '{"commands":["/usr/bin/aws s3 cp s3://${{ secrets.S3_BUCKET_ARTIFACTS }}/backend-builds/boutique-app-latest.jar /home/ubuntu/app/boutique-app.jar > /home/ubuntu/app/deploy.log 2>&1","sudo chown ubuntu:ubuntu /home/ubuntu/app/boutique-app.jar >> /home/ubuntu/app/deploy.log 2>&1","sudo systemctl restart boutique.service >> /home/ubuntu/app/deploy.log 2>&1"]}' \
           --comment "Deploy Backend App from S3 and Restart Service"
