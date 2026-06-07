@@ -17,7 +17,8 @@ import java.util.List;
 public class Order {
 
     public enum OrderStatus {
-        CREATED, PENDING, CONFIRMED, PROCESSING, PACKED, SHIPPED, OUT_FOR_DELIVERY, DELIVERED, CANCELLED, RETURN_REQUESTED, RETURN_PICKED, RETURNED
+        CREATED, PENDING, CONFIRMED, PROCESSING, PACKED, SHIPPED, OUT_FOR_DELIVERY, DELIVERED, CANCELLED,
+        RETURN_REQUESTED, RETURN_PICKED, RETURNED
     }
 
     @Id
@@ -43,7 +44,8 @@ public class Order {
     @Column(columnDefinition = "TEXT")
     private String shippingAddressSnapshot;
 
-    // Details of items included (simplified: would typically be a separate OrderItem entity)
+    // Details of items included (simplified: would typically be a separate
+    // OrderItem entity)
     @Column(columnDefinition = "TEXT")
     private String orderItemsSnapshot;
 }

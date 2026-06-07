@@ -19,7 +19,8 @@ public class VideoRestController {
 
     /**
      * GET /api/video/token
-     * Generates a temporary Agora token so the frontend can join the live broadcast securely.
+     * Generates a temporary Agora token so the frontend can join the live broadcast
+     * securely.
      */
     @GetMapping("/token")
     public ResponseEntity<?> getVideoToken(
@@ -37,7 +38,7 @@ public class VideoRestController {
             response.put("channel", channelName);
             response.put("appId", agoraTokenService.getAppId()); // Frontend needs App ID to initialize
             response.put("uid", uid);
-            
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {

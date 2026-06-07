@@ -25,9 +25,9 @@ public class RegistrationDTO implements Serializable {
     @NotBlank(message = "Email (Username) is required.")
     private String username; // Mapped to User.username
 
-    // MODIFIED: Password Policy: min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special character
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-            message = "Password must be at least 8 characters long and contain one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).")
+    // MODIFIED: Password Policy: min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1
+    // special character
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Password must be at least 8 characters long and contain one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).")
     @NotBlank(message = "Password is required.")
     private String password;
 
@@ -35,7 +35,8 @@ public class RegistrationDTO implements Serializable {
     private String confirmPassword;
 
     // --- NEW REQUIRED FIELD (for Customer profile) ---
-    // Assuming simple validation for now, more complex E.164 validation would be client/service-side
+    // Assuming simple validation for now, more complex E.164 validation would be
+    // client/service-side
     @Pattern(regexp = "^[+]?[0-9]{10,15}$", message = "Enter a valid phone number (10-15 digits).")
     @NotBlank(message = "Phone Number is required.")
     private String phoneNumber;
@@ -43,7 +44,6 @@ public class RegistrationDTO implements Serializable {
     // --- MANDATORY CONSENT ---
     @AssertTrue(message = "You must accept the Terms and Privacy Policy to register.")
     private Boolean termsAccepted = false;
-
 
     // --- OPTIONAL FIELDS (Progressive Profiling) ---
     // These will be optional in the registration form but available in the DTO

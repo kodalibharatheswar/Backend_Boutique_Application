@@ -56,14 +56,14 @@ public class WishlistRestController {
             response.put("authenticated", true);
             response.put("wishlistItems", items);
             response.put("itemCount", items.size());
-            
+
             return ResponseEntity.ok(response);
 
         } catch (RuntimeException e) {
             response.put("authenticated", false);
             response.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            
+
         } catch (Exception e) {
             response.put("error", true);
             response.put("message", "Error retrieving wishlist: " + e.getMessage());
@@ -81,7 +81,7 @@ public class WishlistRestController {
     public ResponseEntity<Map<String, Object>> addProductToWishlist(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long productId) {
-        
+
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -98,7 +98,7 @@ public class WishlistRestController {
 
             response.put("success", true);
             response.put("message", "Product added to your Wishlist!");
-            
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
@@ -117,7 +117,7 @@ public class WishlistRestController {
     public ResponseEntity<Map<String, Object>> removeProductFromWishlist(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long productId) {
-        
+
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -137,14 +137,14 @@ public class WishlistRestController {
 
             response.put("success", true);
             response.put("message", "Item removed from Wishlist.");
-            
+
             return ResponseEntity.ok(response);
 
         } catch (RuntimeException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Could not remove item from wishlist: " + e.getMessage());

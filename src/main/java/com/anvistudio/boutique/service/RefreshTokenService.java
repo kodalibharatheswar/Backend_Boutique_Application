@@ -31,7 +31,8 @@ public class RefreshTokenService {
 
     @Transactional
     public RefreshToken createRefreshToken(Long userId) {
-        // Immediately DELETE existing token via JPQL (flush-safe, avoids unique key violation)
+        // Immediately DELETE existing token via JPQL (flush-safe, avoids unique key
+        // violation)
         refreshTokenRepository.deleteAllByUserId(userId);
 
         RefreshToken refreshToken = new RefreshToken();

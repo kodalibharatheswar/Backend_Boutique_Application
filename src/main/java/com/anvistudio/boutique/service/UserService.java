@@ -30,15 +30,16 @@ public class UserService implements UserDetailsService {
 
     private static final Pattern PHONE_PATTERN = Pattern.compile("^[+]?[0-9]{10,15}$");
 
-//    private static final Pattern PASSWORD_POLICY_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$");
+    // private static final Pattern PASSWORD_POLICY_PATTERN =
+    // Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$");
 
     // MODIFIED: Added special character validation: (?=.*[@$!%*?&])
-    private static final Pattern PASSWORD_POLICY_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
+    private static final Pattern PASSWORD_POLICY_PATTERN = Pattern
+            .compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
 
     // Hardcoded Default Admin Credentials
     private static final String DEFAULT_ADMIN_USERNAME = "admin";
     private static final String DEFAULT_ADMIN_PASSWORD = "password123";
-
 
     public final UserRepository userRepository;
     private final CustomerRepository customerRepository;
@@ -47,8 +48,8 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, CustomerRepository customerRepository,
-                       VerificationTokenRepository tokenRepository, EmailService emailService,
-                       PasswordEncoder passwordEncoder) {
+            VerificationTokenRepository tokenRepository, EmailService emailService,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.customerRepository = customerRepository;
         this.tokenRepository = tokenRepository;
@@ -57,7 +58,8 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * NEW: Ensures the default admin account exists in the database upon application startup.
+     * NEW: Ensures the default admin account exists in the database upon
+     * application startup.
      */
     @PostConstruct
     @Transactional
@@ -70,7 +72,8 @@ public class UserService implements UserDetailsService {
             defaultAdmin.setRole("ADMIN");
             defaultAdmin.setEmailVerified(true);
             defaultAdmin.setCredentialsUpdated(false); // MUST be false for initial login check
-            // Set a placeholder phone number to enable phone recovery on first login if needed
+            // Set a placeholder phone number to enable phone recovery on first login if
+            // needed
             defaultAdmin.setRecoveryPhoneNumber("9999999999");
             userRepository.save(defaultAdmin);
             System.out.println("SECURITY INFO: Default admin account created in DB.");
@@ -80,7 +83,6 @@ public class UserService implements UserDetailsService {
             System.out.println("SECURITY INFO: Admin account already exists in DB.");
         }
     }
-
 
     /**
      * CRITICAL REFACTOR: Now relies ONLY on the database for user details.
@@ -97,7 +99,8 @@ public class UserService implements UserDetailsService {
         // CRITICAL: User must be verified to log in (except for Admin)
         boolean isEnabled = user.getEmailVerified() || "ADMIN".equals(user.getRole());
 
-        // Throw DisabledException if not enabled (will be caught by SecurityConfig failure handler)
+        // Throw DisabledException if not enabled (will be caught by SecurityConfig
+        // failure handler)
         if (!isEnabled) {
             throw new DisabledException("Account is not yet verified. Please confirm your email address.");
         }
@@ -105,7 +108,8 @@ public class UserService implements UserDetailsService {
         GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole());
 
         // For social (Google/OAuth2) users, password is stored as empty string ""
-        // Spring Security's User constructor throws IllegalArgumentException for empty/null passwords.
+        // Spring Security's User constructor throws IllegalArgumentException for
+        // empty/null passwords.
         // Use a sentinel placeholder that can NEVER match any real BCrypt hash.
         String password = user.getPassword();
         if (password == null || password.isEmpty()) {
@@ -117,8 +121,7 @@ public class UserService implements UserDetailsService {
                 password,
                 isEnabled,
                 true, true, true,
-                Collections.singleton(authority)
-        );
+                Collections.singleton(authority));
     }
 
     /**
@@ -150,7 +153,8 @@ public class UserService implements UserDetailsService {
             }
 
             // 2b. Try to find ADMIN by recovery phone number (via User table)
-            // Use stream to handle potential multiple matches, though recovery phone should ideally be unique.
+            // Use stream to handle potential multiple matches, though recovery phone should
+            // ideally be unique.
             Optional<User> adminUser = userRepository.findAll().stream()
                     .filter(u -> "ADMIN".equals(u.getRole()))
                     .filter(u -> identifier.equals(u.getRecoveryPhoneNumber()))
@@ -165,13 +169,12 @@ public class UserService implements UserDetailsService {
         return Optional.empty();
     }
 
-
-
     /**
      * MODIFIED: Updates admin credentials and sets the flag.
      */
     @Transactional
-    public User updateAdminCredentials(String currentUsername, String newUsername, String newPassword, String recoveryPhoneNumber) {
+    public User updateAdminCredentials(String currentUsername, String newUsername, String newPassword,
+            String recoveryPhoneNumber) {
 
         // 1. Fetch the existing admin user from the DB
         User adminUser = userRepository.findByUsername(currentUsername)
@@ -189,9 +192,9 @@ public class UserService implements UserDetailsService {
 
         // Validation: Enforce new password policy
         if (!PASSWORD_POLICY_PATTERN.matcher(newPassword).matches()) {
-            throw new IllegalStateException("New password does not meet complexity requirements (Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character).");
+            throw new IllegalStateException(
+                    "New password does not meet complexity requirements (Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character).");
         }
-
 
         // 4. Apply changes and set the critical flags
         adminUser.setUsername(newUsername);
@@ -211,7 +214,6 @@ public class UserService implements UserDetailsService {
                 .map(User::getCredentialsUpdated)
                 .orElse(false);
     }
-
 
     // --- Customer Registration Logic ---
     @Transactional
@@ -245,8 +247,10 @@ public class UserService implements UserDetailsService {
         newCustomer.setPreferredSize(registrationDTO.getPreferredSize());
         newCustomer.setGender(registrationDTO.getGender());
         newCustomer.setTermsAccepted(registrationDTO.getTermsAccepted());
-        // FIX: Ensure newsletterOptIn is directly taken from the DTO, it can be null if not checked
-        newCustomer.setNewsletterOptIn(registrationDTO.getNewsletterOptIn() != null && registrationDTO.getNewsletterOptIn());
+        // FIX: Ensure newsletterOptIn is directly taken from the DTO, it can be null if
+        // not checked
+        newCustomer.setNewsletterOptIn(
+                registrationDTO.getNewsletterOptIn() != null && registrationDTO.getNewsletterOptIn());
 
         if (registrationDTO.getDateOfBirth() != null && !registrationDTO.getDateOfBirth().isEmpty()) {
             try {
@@ -267,11 +271,13 @@ public class UserService implements UserDetailsService {
 
     /**
      * Creates a new OTP for the user and triggers the email sending.
-     * The caller is responsible for cleaning up old tokens *before* calling this method.
+     * The caller is responsible for cleaning up old tokens *before* calling this
+     * method.
      */
     @Transactional
     public void createOtpAndSendEmail(User user, TokenType tokenType) {
-        // We create the token here and rely on the calling method to have cleared the old token.
+        // We create the token here and rely on the calling method to have cleared the
+        // old token.
 
         VerificationToken otpToken = new VerificationToken(user, tokenType);
         tokenRepository.save(otpToken);
@@ -281,12 +287,14 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * NEW: Creates a new OTP for the user and triggers the email sending (For REGISTRATION).
+     * NEW: Creates a new OTP for the user and triggers the email sending (For
+     * REGISTRATION).
      * This method is called from registration flow.
      */
     @Transactional
     public void createOtpAndSendEmail(User user) {
-        // Ensure old token is deleted and flushed before creating a new one for registration
+        // Ensure old token is deleted and flushed before creating a new one for
+        // registration
         tokenRepository.deleteByUserId(user.getId());
         tokenRepository.flush(); // <--- CRITICAL FIX: Ensure DELETE is executed now
 
@@ -302,7 +310,8 @@ public class UserService implements UserDetailsService {
         User user = findUserByIdentifier(identifier)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + identifier));
 
-        // FIX: Ensure old token is deleted and flushed before creating a new one for password reset
+        // FIX: Ensure old token is deleted and flushed before creating a new one for
+        // password reset
         tokenRepository.deleteByUserId(user.getId());
         tokenRepository.flush(); // <--- CRITICAL FIX: Ensure DELETE is executed now
 
@@ -312,11 +321,11 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-
     // --- NEW: Email Change Logic (Critical Constructor Fix Applied) ---
 
     /**
-     * Step 1: Validates the new email, checks if it's available, and sends an OTP to it.
+     * Step 1: Validates the new email, checks if it's available, and sends an OTP
+     * to it.
      */
     @Transactional
     public void initiateEmailChange(String currentUsername, String newEmail) {
@@ -334,15 +343,18 @@ public class UserService implements UserDetailsService {
 
         // 3. Check if the new email is already taken
         if (userRepository.findByUsername(newEmail).isPresent()) {
-            throw new IllegalStateException("The email address '" + newEmail + "' is already registered to another account.");
+            throw new IllegalStateException(
+                    "The email address '" + newEmail + "' is already registered to another account.");
         }
 
-        // 4. CRITICAL FIX: Delete the existing token *before* saving the new one and flush the changes.
+        // 4. CRITICAL FIX: Delete the existing token *before* saving the new one and
+        // flush the changes.
         tokenRepository.deleteByUserId(user.getId());
         tokenRepository.flush();
 
         // 5. Create OTP: The token is linked to the existing user ID.
-        // We create a temp User object *in memory* with the new email for the EmailService to target.
+        // We create a temp User object *in memory* with the new email for the
+        // EmailService to target.
         User tempUserForEmail = new User();
         tempUserForEmail.setId(user.getId());
         tempUserForEmail.setUsername(newEmail);
@@ -352,7 +364,6 @@ public class UserService implements UserDetailsService {
         tempUserForEmail.setCredentialsUpdated(user.getCredentialsUpdated());
         tempUserForEmail.setRecoveryPhoneNumber(user.getRecoveryPhoneNumber());
 
-
         VerificationToken otpToken = new VerificationToken(user, TokenType.NEW_EMAIL_VERIFICATION);
         tokenRepository.save(otpToken); // Saves token linked to old User ID
 
@@ -361,7 +372,8 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Step 2: Finalizes the email change by verifying the OTP and updating the username.
+     * Step 2: Finalizes the email change by verifying the OTP and updating the
+     * username.
      */
     @Transactional
     public void finalizeEmailChange(String currentUsername, String newEmail, String otp) {
@@ -374,7 +386,8 @@ public class UserService implements UserDetailsService {
                 .filter(token -> token.getTokenType() == TokenType.NEW_EMAIL_VERIFICATION);
 
         if (tokenOptional.isEmpty()) {
-            throw new IllegalStateException("No active email change request found or token expired. Please try initiating the change again.");
+            throw new IllegalStateException(
+                    "No active email change request found or token expired. Please try initiating the change again.");
         }
 
         VerificationToken token = tokenOptional.get();
@@ -493,7 +506,6 @@ public class UserService implements UserDetailsService {
         return dto;
     }
 
-
     /**
      * NEW: Updates customer details (names, phone, optional fields).
      */
@@ -508,9 +520,11 @@ public class UserService implements UserDetailsService {
         // 1. Validate Phone Number change
         if (!customer.getPhoneNumber().equals(profileDTO.getPhoneNumber())) {
             // Check if the new phone number is already registered by another customer
-            Optional<Customer> existingCustomerWithNewPhone = customerRepository.findByPhoneNumber(profileDTO.getPhoneNumber());
+            Optional<Customer> existingCustomerWithNewPhone = customerRepository
+                    .findByPhoneNumber(profileDTO.getPhoneNumber());
 
-            if (existingCustomerWithNewPhone.isPresent() && !existingCustomerWithNewPhone.get().getId().equals(customer.getId())) {
+            if (existingCustomerWithNewPhone.isPresent()
+                    && !existingCustomerWithNewPhone.get().getId().equals(customer.getId())) {
                 throw new IllegalStateException("The new phone number is already registered with another account.");
             }
             customer.setPhoneNumber(profileDTO.getPhoneNumber());
@@ -537,7 +551,8 @@ public class UserService implements UserDetailsService {
         }
 
         customerRepository.save(customer);
-        // Note: User.username (email) is NOT updated here. That requires a separate secure flow.
+        // Note: User.username (email) is NOT updated here. That requires a separate
+        // secure flow.
     }
 
     /**
@@ -558,9 +573,11 @@ public class UserService implements UserDetailsService {
             throw new IllegalStateException("New passwords do not match.");
         }
 
-        // 3. Validate new password strength (using the same pattern as registration DTO)
+        // 3. Validate new password strength (using the same pattern as registration
+        // DTO)
         if (!PASSWORD_POLICY_PATTERN.matcher(newPassword).matches()) {
-            throw new IllegalStateException("New password does not meet complexity requirements (Min 8 chars, 1 uppercase, 1 lowercase, 1 number).");
+            throw new IllegalStateException(
+                    "New password does not meet complexity requirements (Min 8 chars, 1 uppercase, 1 lowercase, 1 number).");
         }
 
         // 4. Update and Save

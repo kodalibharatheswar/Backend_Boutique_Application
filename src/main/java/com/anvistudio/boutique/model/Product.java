@@ -38,7 +38,9 @@ public class Product {
 
     /**
      * Helper method to calculate the final price after discount.
-     * @return The discounted price, or the original price if no discount is applied.
+     * 
+     * @return The discounted price, or the original price if no discount is
+     *         applied.
      */
     public BigDecimal getDiscountedPrice() {
         if (discountPercent == null || discountPercent <= 0 || price == null) {
@@ -48,8 +50,7 @@ public class Product {
         // Calculate discounted price: price * (1 - discountPercent / 100)
         BigDecimal discountFactor = BigDecimal.ONE.subtract(
                 BigDecimal.valueOf(discountPercent)
-                        .divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP)
-        );
+                        .divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP));
 
         // Use setScale to ensure consistent rounding for currency
         return price.multiply(discountFactor).setScale(2, BigDecimal.ROUND_HALF_UP);
@@ -57,7 +58,8 @@ public class Product {
     // ****************************************
 
     /**
-     * NEW: Determines if the product is a Clearance Sale item (50% discount or more).
+     * NEW: Determines if the product is a Clearance Sale item (50% discount or
+     * more).
      */
     public boolean isClearance() {
         return discountPercent != null && discountPercent >= 50;

@@ -204,7 +204,6 @@ public class AuthRestController {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password));
 
-
             // Set authentication in security context
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -269,7 +268,8 @@ public class AuthRestController {
                 response.put("success", false);
                 response.put("socialLogin", true);
                 response.put("provider", provider);
-                response.put("message", "This account was created with " + provider + " Sign-In. Please use the \"Continue with Google\" button to log in.");
+                response.put("message", "This account was created with " + provider
+                        + " Sign-In. Please use the \"Continue with Google\" button to log in.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
             System.err.println("AUTH RUNTIME ERROR during login for [" + username + "]: " + e.getMessage());
@@ -277,14 +277,14 @@ public class AuthRestController {
             response.put("message", "An unexpected error occurred. Please try again.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         } catch (Exception e) {
-            System.err.println("AUTH CRITICAL ERROR during login for [" + username + "]: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            System.err.println("AUTH CRITICAL ERROR during login for [" + username + "]: "
+                    + e.getClass().getSimpleName() + ": " + e.getMessage());
             e.printStackTrace();
             response.put("success", false);
             response.put("message", "An unexpected error occurred. Please try again.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 
     /**
      * POST /api/auth/refresh-token
@@ -319,7 +319,8 @@ public class AuthRestController {
 
     /**
      * GET /api/auth/me
-     * Returns the currently authenticated user's details based on the HttpOnly JWT/Session.
+     * Returns the currently authenticated user's details based on the HttpOnly
+     * JWT/Session.
      * Crucial for OAuth2 login where frontend relies on cookie to fetch profile.
      */
     @GetMapping("/me")
@@ -327,7 +328,8 @@ public class AuthRestController {
         Map<String, Object> response = new HashMap<>();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
             response.put("success", false);
             response.put("message", "Not authenticated");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
@@ -344,7 +346,7 @@ public class AuthRestController {
             if (user != null) {
                 Map<String, Object> userData = new HashMap<>();
                 userData.put("email", user.getUsername());
-                
+
                 Object roleObj = user.getRole();
                 if (roleObj != null) {
                     if (roleObj.getClass().isEnum()) {
@@ -406,8 +408,6 @@ public class AuthRestController {
         }
         return null;
     }
-
-
 
     // =========================================================================
     // 5. FORGOT PASSWORD FLOW - Step 1: Request OTP
@@ -556,9 +556,11 @@ public class AuthRestController {
     /**
      * GET /api/auth/check
      * Checks if the user is currently authenticated.
-     * Returns firstName + lastName from customer_details so Navbar can show the user's name.
+     * Returns firstName + lastName from customer_details so Navbar can show the
+     * user's name.
      *
-     * Response: { authenticated: boolean, user: { email, role, firstName, lastName } }
+     * Response: { authenticated: boolean, user: { email, role, firstName, lastName
+     * } }
      */
     @GetMapping("/check")
     public ResponseEntity<Map<String, Object>> checkAuth() {
@@ -570,11 +572,14 @@ public class AuthRestController {
                 !authentication.getPrincipal().equals("anonymousUser")) {
 
             String username = authentication.getName();
-            
-            // CRITICAL FIX: If the session was preserved from Google OAuth2 login directly (via JSESSIONID),
+
+            // CRITICAL FIX: If the session was preserved from Google OAuth2 login directly
+            // (via JSESSIONID),
             // authentication.getName() returns the Google Provider ID (e.g., 101588...).
-            // We need to extract the actual email address which is stored in the attributes.
-            if (authentication.getPrincipal() instanceof org.springframework.security.oauth2.core.user.OAuth2User oauthUser) {
+            // We need to extract the actual email address which is stored in the
+            // attributes.
+            if (authentication
+                    .getPrincipal() instanceof org.springframework.security.oauth2.core.user.OAuth2User oauthUser) {
                 String email = (String) oauthUser.getAttributes().get("email");
                 if (email != null) {
                     username = email;
@@ -593,7 +598,8 @@ public class AuthRestController {
                     Object roleObj = user.getRole();
                     if (roleObj != null) {
                         userData.put("role", roleObj.getClass().isEnum()
-                            ? ((Enum<?>) roleObj).name() : roleObj.toString());
+                                ? ((Enum<?>) roleObj).name()
+                                : roleObj.toString());
                     } else {
                         userData.put("role", "CUSTOMER");
                     }
@@ -601,12 +607,13 @@ public class AuthRestController {
                     userData.put("role", "CUSTOMER");
                 }
 
-                // Fetch customer profile for firstName / lastName (works for both normal and Google users)
+                // Fetch customer profile for firstName / lastName (works for both normal and
+                // Google users)
                 try {
                     Optional<Customer> customerOpt = customerRepository.findByUserId(user.getId());
                     customerOpt.ifPresent(customer -> {
                         userData.put("firstName", customer.getFirstName());
-                        userData.put("lastName",  customer.getLastName());
+                        userData.put("lastName", customer.getLastName());
                         userData.put("phoneNumber", customer.getPhoneNumber());
                     });
                 } catch (Exception ignored) {
@@ -683,19 +690,19 @@ public class AuthRestController {
         String username = creds.get("username");
         String password = creds.get("password");
         Map<String, Object> debugInfo = new HashMap<>();
-        
+
         System.out.println("--- ADMIN LOGIN DEBUG START ---");
         System.out.println("Checking username: " + username);
-        
+
         Optional<User> userOpt = userService.findUserByUsername(username);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             System.out.println("User found in DB. Role: " + user.getRole());
             System.out.println("Stored Hash: " + user.getPassword());
-            
+
             boolean match = org.springframework.security.crypto.bcrypt.BCrypt.checkpw(password, user.getPassword());
             System.out.println("Direct BCrypt Match Test: " + (match ? "PASS" : "FAIL"));
-            
+
             debugInfo.put("userFound", true);
             debugInfo.put("role", user.getRole());
             debugInfo.put("matches", match);
@@ -704,8 +711,7 @@ public class AuthRestController {
             debugInfo.put("userFound", false);
         }
         System.out.println("--- ADMIN LOGIN DEBUG END ---");
-        
+
         return ResponseEntity.ok(debugInfo);
     }
 }
-

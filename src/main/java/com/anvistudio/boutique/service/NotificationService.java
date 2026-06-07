@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -31,11 +30,10 @@ public class NotificationService {
     @Value("${app.base.url:http://localhost:8080}")
     private String appBaseUrl;
 
-
     public NotificationService(NewsletterSubscriptionRepository subscriptionRepository,
-                               CustomerRepository customerRepository,
-                               UserRepository userRepository, // Injected
-                               JavaMailSender javaMailSender) {
+            CustomerRepository customerRepository,
+            UserRepository userRepository, // Injected
+            JavaMailSender javaMailSender) {
         this.subscriptionRepository = subscriptionRepository;
         this.customerRepository = customerRepository;
         this.userRepository = userRepository;
@@ -54,9 +52,11 @@ public class NotificationService {
 
         // 1. Check if the email already exists as a registered user
         if (userRepository.findByUsername(email).isPresent()) {
-            // Note: If they are a registered user, they should manage their subscription in their profile.
+            // Note: If they are a registered user, they should manage their subscription in
+            // their profile.
             // We just provide a warning here if they try to use the public form.
-            throw new IllegalStateException("This email is already registered as a customer. Please check your profile to manage newsletter settings.");
+            throw new IllegalStateException(
+                    "This email is already registered as a customer. Please check your profile to manage newsletter settings.");
         }
 
         // 2. Check if the email is already in the general subscription list
@@ -77,11 +77,11 @@ public class NotificationService {
         }
     }
 
-
     /**
      * Finds all unique emails for notification:
      * 1. Registered Customers who opted-in (`newsletterOptIn = true`)
      * 2. Non-registered Subscribers from the footer table (`isActive = true`)
+     * 
      * @return Set of unique email addresses.
      */
     private Set<String> getAllActiveSubscriberEmails() {
@@ -111,6 +111,7 @@ public class NotificationService {
 
     /**
      * Sends an exclusive offer notification for a new/updated sale product.
+     * 
      * @param product The product now on sale/clearance.
      */
     public void sendSaleNotification(Product product) {
@@ -138,7 +139,7 @@ public class NotificationService {
                         "Description: %s\n\n" +
                         "Shop now before it sells out!\n" +
                         "[Link to Product: %s]\n\n" + // Use the new product URL
-                        "Thank you for being an Anvi Studio subscriber!",
+                        "Thank you for being an anvi Studio subscriber!",
                 offerType,
                 product.getName(),
                 product.getSku(),
@@ -153,7 +154,7 @@ public class NotificationService {
         // Send a separate email to each recipient
         for (String email : recipientEmails) {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("Anvi Studio Offers <bharath161099@gmail.com>");
+            message.setFrom("anvi Studio Offers <bharath161099@gmail.com>");
             message.setTo(email);
             message.setSubject(subject);
             message.setText(body);

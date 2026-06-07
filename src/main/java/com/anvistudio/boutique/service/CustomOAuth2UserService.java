@@ -35,7 +35,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private OAuth2User processOAuth2User(String registrationId, OAuth2User oAuth2User) {
         Map<String, Object> attributes = oAuth2User.getAttributes();
-        String email     = (String) attributes.get("email");
+        String email = (String) attributes.get("email");
         String providerId = oAuth2User.getName(); // 'sub' claim from Google
 
         if (email == null) {
@@ -43,16 +43,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // Extract clean name fields directly from Google's attributes
-        String givenName  = (String) attributes.get("given_name");
+        String givenName = (String) attributes.get("given_name");
         String familyName = (String) attributes.get("family_name");
-        String fullName   = (String) attributes.get("name");
+        String fullName = (String) attributes.get("name");
 
         // Derive clean firstName / lastName
-        String firstName = (givenName  != null && !givenName.isBlank())  ? givenName.trim()
-                         : (fullName   != null && !fullName.isBlank())    ? fullName.trim()
-                         : "Social";
-        String lastName  = (familyName != null && !familyName.isBlank()) ? familyName.trim()
-                         : "User";
+        String firstName = (givenName != null && !givenName.isBlank()) ? givenName.trim()
+                : (fullName != null && !fullName.isBlank()) ? fullName.trim()
+                        : "Social";
+        String lastName = (familyName != null && !familyName.isBlank()) ? familyName.trim()
+                : "User";
 
         Optional<User> userOptional = userRepository.findByUsername(email);
         User user;
@@ -77,16 +77,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 customer.setLastName(lastName);
                 customerRepository.save(customer);
                 System.out.println("OAuth2: Updated customer profile for " + email
-                    + " → " + firstName + " " + lastName);
+                        + " → " + firstName + " " + lastName);
             });
 
         } else {
             // --- New user: create User + Customer profile ---
             user = new User();
             user.setUsername(email);
-            user.setPassword("");          // No local password for social users
+            user.setPassword(""); // No local password for social users
             user.setRole("CUSTOMER");
-            user.setEmailVerified(true);   // Google verifies emails
+            user.setEmailVerified(true); // Google verifies emails
             user.setAuthProvider(registrationId.toUpperCase());
             user.setProviderId(providerId);
             user = userRepository.save(user);
@@ -96,14 +96,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             customer.setFirstName(firstName);
             customer.setLastName(lastName);
             customer.setPhoneNumber("0000000000"); // Placeholder — user should update
-            customer.setTermsAccepted(true);       // Implicitly accepted via social login
+            customer.setTermsAccepted(true); // Implicitly accepted via social login
 
             customerRepository.save(customer);
             System.out.println("OAuth2: Registered new social user " + email
-                + " (" + registrationId + ") → " + firstName + " " + lastName);
+                    + " (" + registrationId + ") → " + firstName + " " + lastName);
         }
 
         return oAuth2User;
     }
 }
-

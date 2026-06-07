@@ -22,7 +22,9 @@ public class EmailService {
     /**
      * Sends the OTP to the user's email address.
      * MODIFIED: Content changes based on TokenType.
-     * @param user The user object containing the target email in the username field.
+     * 
+     * @param user  The user object containing the target email in the username
+     *              field.
      * @param token The token object containing the 6-digit OTP and type.
      */
     public void sendOtpEmail(User user, VerificationToken token) {
@@ -33,18 +35,19 @@ public class EmailService {
 
         // Customize subject and action based on the purpose of the OTP
         if (token.getTokenType() == TokenType.PASSWORD_RESET) {
-            subject = "Anvi Studio: Password Reset Code (OTP)";
+            subject = "anvi Studio: Password Reset Code (OTP)";
             action = "reset your password";
         } else if (token.getTokenType() == TokenType.NEW_EMAIL_VERIFICATION) { // NEW TYPE
-            subject = "Anvi Studio: Verify Your New Email Address (OTP)";
+            subject = "anvi Studio: Verify Your New Email Address (OTP)";
             action = "change your login email to " + user.getUsername();
         } else { // REGISTRATION
-            subject = "Anvi Studio: Your One-Time Password (OTP) for Registration";
+            subject = "anvi Studio: Your One-Time Password (OTP) for Registration";
             action = "activate your account";
         }
 
-        mailMessage.setFrom("Anvi Studio Support <bharath161099@gmail.com>");
-        // CRITICAL: Set the recipient to the User's username (which is the target email)
+        mailMessage.setFrom("anvi Studio Support <bharath161099@gmail.com>");
+        // CRITICAL: Set the recipient to the User's username (which is the target
+        // email)
         mailMessage.setTo(user.getUsername());
         mailMessage.setSubject(subject);
 
@@ -60,9 +63,11 @@ public class EmailService {
 
         try {
             javaMailSender.send(mailMessage);
-            System.out.println("SMTP: Successfully sent OTP email for " + token.getTokenType() + " to " + user.getUsername());
+            System.out.println(
+                    "SMTP: Successfully sent OTP email for " + token.getTokenType() + " to " + user.getUsername());
         } catch (Exception e) {
-            System.err.println("SMTP ERROR: Failed to send OTP email for " + token.getTokenType() + " to " + user.getUsername());
+            System.err.println(
+                    "SMTP ERROR: Failed to send OTP email for " + token.getTokenType() + " to " + user.getUsername());
             e.printStackTrace();
         }
     }

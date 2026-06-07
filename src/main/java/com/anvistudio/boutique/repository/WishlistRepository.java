@@ -15,7 +15,8 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
     List<Wishlist> findByUserId(Long userId);
 
     /**
-     * Finds a specific wishlist item by user ID and product ID (used for checking if an item is already wished).
+     * Finds a specific wishlist item by user ID and product ID (used for checking
+     * if an item is already wished).
      */
     Optional<Wishlist> findByUserIdAndProductId(Long userId, Long productId);
 

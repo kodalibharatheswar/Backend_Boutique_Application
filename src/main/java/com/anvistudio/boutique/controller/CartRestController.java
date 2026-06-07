@@ -69,14 +69,14 @@ public class CartRestController {
             response.put("cartItems", items);
             response.put("cartTotal", total);
             response.put("itemCount", items.size());
-            
+
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException e) {
             response.put("authenticated", false);
             response.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            
+
         } catch (Exception e) {
             response.put("error", true);
             response.put("message", "Error retrieving cart: " + e.getMessage());
@@ -93,7 +93,7 @@ public class CartRestController {
     public ResponseEntity<Map<String, Object>> addProductToCart(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody AddToCartRequest request) {
-        
+
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -107,14 +107,13 @@ public class CartRestController {
 
             // Add product to cart
             cartService.addProductToCart(
-                userDetails.getUsername(), 
-                request.getProductId(), 
-                request.getQuantity() != null ? request.getQuantity() : 1
-            );
+                    userDetails.getUsername(),
+                    request.getProductId(),
+                    request.getQuantity() != null ? request.getQuantity() : 1);
 
             response.put("success", true);
             response.put("message", "Item added to cart successfully!");
-            
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
@@ -132,7 +131,7 @@ public class CartRestController {
     public ResponseEntity<Map<String, Object>> removeItemFromCart(
             @PathVariable Long itemId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        
+
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -148,7 +147,7 @@ public class CartRestController {
 
             response.put("success", true);
             response.put("message", "Item removed from cart successfully.");
-            
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
@@ -166,7 +165,7 @@ public class CartRestController {
     public ResponseEntity<Map<String, Object>> updateCartItemQuantity(
             @RequestBody UpdateCartItemRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        
+
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -182,7 +181,7 @@ public class CartRestController {
 
             response.put("success", true);
             response.put("message", "Cart item updated successfully.");
-            
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {

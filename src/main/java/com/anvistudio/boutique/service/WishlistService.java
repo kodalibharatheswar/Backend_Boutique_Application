@@ -18,7 +18,8 @@ public class WishlistService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
 
-    public WishlistService(WishlistRepository wishlistRepository, UserRepository userRepository, ProductRepository productRepository) {
+    public WishlistService(WishlistRepository wishlistRepository, UserRepository userRepository,
+            ProductRepository productRepository) {
         this.wishlistRepository = wishlistRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
@@ -26,7 +27,8 @@ public class WishlistService {
 
     /**
      * Adds a product to a user's wishlist, ensuring no duplicates.
-     * @param username The username of the currently logged-in user.
+     * 
+     * @param username  The username of the currently logged-in user.
      * @param productId The ID of the product to add.
      */
     @Transactional

@@ -33,7 +33,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getServletPath();
-        
+
         // Only rate limit specific sensitive authentication endpoints
         if (path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register")) {
             String clientIp = getClientIp(request);

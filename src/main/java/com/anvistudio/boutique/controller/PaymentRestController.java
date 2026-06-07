@@ -31,7 +31,8 @@ public class PaymentRestController {
     private final UserService userService;
     private final AddressService addressService;
 
-    public PaymentRestController(StripeService stripeService, CartService cartService, OrderService orderService, UserService userService, AddressService addressService) {
+    public PaymentRestController(StripeService stripeService, CartService cartService, OrderService orderService,
+            UserService userService, AddressService addressService) {
         this.stripeService = stripeService;
         this.cartService = cartService;
         this.orderService = orderService;
@@ -58,7 +59,8 @@ public class PaymentRestController {
 
             Optional<Address> addressOptional = addressService.getAddressById(addressId);
             if (addressOptional.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Selected address not found."));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Selected address not found."));
             }
 
             List<CartItem> cartItems = cartService.getCartItems(userId);
@@ -97,9 +99,10 @@ public class PaymentRestController {
             User user = getAuthenticatedUser(userDetails);
             Long userId = user.getId();
 
-            Long addressId = payload.containsKey("addressId") ? Long.valueOf(payload.get("addressId").toString()) : null;
+            Long addressId = payload.containsKey("addressId") ? Long.valueOf(payload.get("addressId").toString())
+                    : null;
             String paymentMethod = payload.containsKey("paymentMethod") ? payload.get("paymentMethod").toString() : "";
-            
+
             if (addressId == null || paymentMethod.isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Missing addressId or paymentMethod"));
             }

@@ -1,4 +1,4 @@
- package com.anvistudio.boutique.model;
+package com.anvistudio.boutique.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,7 +16,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // The username is the unique email address, set to nullable = false and unique = true
+    // The username is the unique email address, set to nullable = false and unique
+    // = true
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -47,14 +48,16 @@ public class User {
 
     // --- NEW FIELD: Admin Initial Setup Flag ---
     /**
-     * For ADMIN role only: true if the admin has changed the default hardcoded password.
+     * For ADMIN role only: true if the admin has changed the default hardcoded
+     * password.
      */
     @Column(nullable = false)
     private Boolean credentialsUpdated = false;
 
     // --- NEW FIELD: Recovery Phone Number (Used primarily by Admin/Fallbacks) ---
     /**
-     * Recovery phone number (optional, used for Admin recovery or customer fallback).
+     * Recovery phone number (optional, used for Admin recovery or customer
+     * fallback).
      */
     @Column(nullable = true)
     private String recoveryPhoneNumber;

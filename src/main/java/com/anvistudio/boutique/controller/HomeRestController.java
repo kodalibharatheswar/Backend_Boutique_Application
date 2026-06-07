@@ -37,10 +37,10 @@ public class HomeRestController {
      * GET /api/public/home
      * Get home page data with products and user info (if authenticated)
      * 
-     * Response: { 
-     *   authenticated: boolean, 
-     *   customer: { firstName, lastName, email }, 
-     *   products: [...] 
+     * Response: {
+     * authenticated: boolean,
+     * customer: { firstName, lastName, email },
+     * products: [...]
      * }
      */
     @GetMapping("/home")
@@ -49,15 +49,15 @@ public class HomeRestController {
 
         // Check authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAuthenticated = authentication != null && 
-                                  authentication.isAuthenticated() && 
-                                  !authentication.getPrincipal().equals("anonymousUser");
+        boolean isAuthenticated = authentication != null &&
+                authentication.isAuthenticated() &&
+                !authentication.getPrincipal().equals("anonymousUser");
 
         response.put("authenticated", isAuthenticated);
 
         if (isAuthenticated) {
             String username = authentication.getName();
-            
+
             // Fetch Customer details if authenticated
             Optional<Customer> customerOptional = userService.getCustomerDetailsByUsername(username);
             if (customerOptional.isPresent()) {
@@ -93,16 +93,18 @@ public class HomeRestController {
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "color", required = false) String color,
             @RequestParam(value = "keyword", required = false) String keyword) {
-            
+
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        
-        if (category != null || minPrice != null || maxPrice != null || status != null || color != null || keyword != null || (sortBy != null && !sortBy.equals("latest"))) {
-            response.put("products", productService.getFilteredProducts(category, sortBy, minPrice, maxPrice, status, color, keyword));
+
+        if (category != null || minPrice != null || maxPrice != null || status != null || color != null
+                || keyword != null || (sortBy != null && !sortBy.equals("latest"))) {
+            response.put("products",
+                    productService.getFilteredProducts(category, sortBy, minPrice, maxPrice, status, color, keyword));
         } else {
             response.put("products", productService.getDisplayableProducts());
         }
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -112,7 +114,7 @@ public class HomeRestController {
      */
     @GetMapping("/categories")
     public ResponseEntity<String[]> getCategories() {
-        return ResponseEntity.ok(new String[]{
+        return ResponseEntity.ok(new String[] {
                 "Sarees", "Lehengas", "Kurtis", "Long Frocks", "Mom & Me", "Crop Top – Skirts",
                 "Handlooms", "Casual Frocks", "Ready To Wear", "Dupattas", "Kids wear",
                 "Dress Material", "Blouses", "Fabrics"
@@ -125,8 +127,9 @@ public class HomeRestController {
      */
     @GetMapping("/colors")
     public ResponseEntity<String[]> getColors() {
-        return ResponseEntity.ok(new String[]{
-                "Black", "Blue", "Green", "Red", "Pink", "Yellow", "Maroon", "Purple", "White", "Gray", "Brown", "Orange"
+        return ResponseEntity.ok(new String[] {
+                "Black", "Blue", "Green", "Red", "Pink", "Yellow", "Maroon", "Purple", "White", "Gray", "Brown",
+                "Orange"
         });
     }
 
@@ -150,7 +153,7 @@ public class HomeRestController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("product", product);
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -187,7 +190,7 @@ public class HomeRestController {
     public ResponseEntity<Map<String, Object>> getAboutContent() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("title", "About Anvi Studio Boutique");
+        response.put("title", "About anvi Studio Boutique");
         response.put("content", "Your destination for exquisite traditional and contemporary ethnic wear.");
         return ResponseEntity.ok(response);
     }

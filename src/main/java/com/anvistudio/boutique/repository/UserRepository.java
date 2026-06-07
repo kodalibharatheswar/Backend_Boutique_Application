@@ -7,7 +7,9 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
-     * Finds a User by their username. This is crucial for Spring Security's login process.
+     * Finds a User by their username. This is crucial for Spring Security's login
+     * process.
+     * 
      * @param username The user's login name.
      * @return An Optional containing the User if found.
      */

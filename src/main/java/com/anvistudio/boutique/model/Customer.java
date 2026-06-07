@@ -17,7 +17,8 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Retaining first/last name for compatibility, but focusing on the DTO for input
+    // Retaining first/last name for compatibility, but focusing on the DTO for
+    // input
     @Column(nullable = false)
     private String firstName;
 

@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Handles the payment checkout flow integration with Stripe (Custom Payment Element approach).
+ * Handles the payment checkout flow integration with Stripe (Custom Payment
+ * Element approach).
  */
 @Controller
 public class PaymentController {
@@ -36,7 +37,8 @@ public class PaymentController {
     private final UserService userService;
     private final AddressService addressService; // NEW INJECTION
 
-    public PaymentController(StripeService stripeService, CartService cartService, OrderService orderService, UserService userService, AddressService addressService) {
+    public PaymentController(StripeService stripeService, CartService cartService, OrderService orderService,
+            UserService userService, AddressService addressService) {
         this.stripeService = stripeService;
         this.cartService = cartService;
         this.orderService = orderService;
@@ -53,7 +55,8 @@ public class PaymentController {
     }
 
     /**
-     * STEP 1: Entry point from the Cart. Navigates user to the Address selection page.
+     * STEP 1: Entry point from the Cart. Navigates user to the Address selection
+     * page.
      * Maps to /customer/addresses.
      */
     @GetMapping("/checkout")
@@ -65,8 +68,10 @@ public class PaymentController {
     }
 
     /**
-     * STEP 2 (GET): Displays the custom payment page with selected address details and payment options.
-     * This endpoint is hit after the user selects an address and clicks 'Continue' on the address page.
+     * STEP 2 (GET): Displays the custom payment page with selected address details
+     * and payment options.
+     * This endpoint is hit after the user selects an address and clicks 'Continue'
+     * on the address page.
      */
     @GetMapping("/payment/modes")
     public String showPaymentModes(
@@ -108,7 +113,8 @@ public class PaymentController {
 
         } catch (StripeException e) {
             System.err.println("Stripe API Error: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Could not initialize secure payment. Stripe Error: " + e.getCode());
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Could not initialize secure payment. Stripe Error: " + e.getCode());
             return "redirect:/customer/addresses";
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
@@ -117,9 +123,9 @@ public class PaymentController {
         }
     }
 
-
     /**
-     * STEP 3 (POST): Handles final confirmation for COD or successful card payments confirmed by the client-side Payment Element.
+     * STEP 3 (POST): Handles final confirmation for COD or successful card payments
+     * confirmed by the client-side Payment Element.
      */
     @PostMapping("/payment/confirm")
     @Transactional
@@ -135,13 +141,15 @@ public class PaymentController {
 
         // FUTURE: In a production app, here you would:
         // 1. Verify Payment Intent status (if CARD) using paymentIntentId.
-        // 2. Fetch the selected Address object using addressId and include it in the Order creation.
+        // 2. Fetch the selected Address object using addressId and include it in the
+        // Order creation.
 
         try {
             List<CartItem> cartItems = cartService.getCartItems(userId);
 
             if (cartItems.isEmpty()) {
-                redirectAttributes.addFlashAttribute("successMessage", "Your order was already confirmed! See your order history.");
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Your order was already confirmed! See your order history.");
                 return "redirect:/customer/orders";
             }
 
@@ -160,23 +168,29 @@ public class PaymentController {
 
         } catch (Exception e) {
             System.err.println("Order fulfillment critical error: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "A critical error occurred while finalizing your order. Please contact support.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "A critical error occurred while finalizing your order. Please contact support.");
             return "redirect:/cart";
         }
     }
 
-    // --- Unchanged Redirects (Kept for compatibility with old Checkout links/webhooks) ---
+    // --- Unchanged Redirects (Kept for compatibility with old Checkout
+    // links/webhooks) ---
     @GetMapping("/payment/success")
-    public String paymentSuccess(@RequestParam(value = "session_id", required = false) String sessionId, RedirectAttributes redirectAttributes) {
-        // If Stripe Checkout redirects here, we immediately assume the order was fulfilled by
-        // the client-side success handler in the new flow or redirect to prevent errors from the old flow.
+    public String paymentSuccess(@RequestParam(value = "session_id", required = false) String sessionId,
+            RedirectAttributes redirectAttributes) {
+        // If Stripe Checkout redirects here, we immediately assume the order was
+        // fulfilled by
+        // the client-side success handler in the new flow or redirect to prevent errors
+        // from the old flow.
         redirectAttributes.addFlashAttribute("successMessage", "Order finalized. Check your order history.");
         return "redirect:/customer/orders";
     }
 
     @GetMapping("/payment/cancel")
     public String paymentCancel(RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("cartError", "Payment cancelled or failed. You can try again from your cart.");
+        redirectAttributes.addFlashAttribute("cartError",
+                "Payment cancelled or failed. You can try again from your cart.");
         return "redirect:/cart";
     }
 }

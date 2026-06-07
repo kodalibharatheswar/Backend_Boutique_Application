@@ -8,7 +8,8 @@ import java.util.Calendar;
 import java.util.Random;
 
 /**
- * Entity to store OTP (One-Time Password) for email verification OR password reset.
+ * Entity to store OTP (One-Time Password) for email verification OR password
+ * reset.
  */
 @Entity
 @Table(name = "verification_tokens")

@@ -28,7 +28,6 @@ public class AddressService {
         return addressRepository.findByUserId(user.getId());
     }
 
-
     /**
      * NEW: Retrieves a single address by its ID.
      */
@@ -46,7 +45,8 @@ public class AddressService {
 
         address.setUser(user);
 
-        // Simple logic to ensure only one address can be default (if setting a new default)
+        // Simple logic to ensure only one address can be default (if setting a new
+        // default)
         if (Boolean.TRUE.equals(address.getIsDefault())) {
             // Find current default and unset it
             getAddressesByUsername(username).stream()

@@ -70,7 +70,6 @@ public class SecurityConfig {
     @Value("${app.oauth2.failure-redirect-url:http://localhost:3000/login?error=oauth2}")
     private String oauth2FailureRedirectUrl;
 
-
     /**
      * Expose AuthenticationManager as a Bean.
      * Spring Security 6+ auto-configures DaoAuthenticationProvider when it
@@ -120,149 +119,137 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // ── CORS ──────────────────────────────────────────────────────────
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // ── CORS ──────────────────────────────────────────────────────────
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-            // ── CSRF: disable for API routes only ────────────────────────────
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**", "/oauth2/**")
-            )
+                // ── CSRF: disable for API routes only ────────────────────────────
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/**", "/oauth2/**"))
 
-            // ── Session: keep sessions for OAuth2 redirect dance ─────────────
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-            )
+                // ── Session: keep sessions for OAuth2 redirect dance ─────────────
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
-            // ── JWT filter wiring ─────────────────────────────────────────────
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(rateLimitingFilter, JwtAuthenticationFilter.class)
+                // ── JWT filter wiring ─────────────────────────────────────────────
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitingFilter, JwtAuthenticationFilter.class)
 
-            // ── Request authorisations ────────────────────────────────────────
-            .authorizeHttpRequests(auth -> auth
-                // Always allow pre-flight
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // ── Request authorisations ────────────────────────────────────────
+                .authorizeHttpRequests(auth -> auth
+                        // Always allow pre-flight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // Public API endpoints
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/public/**").permitAll()
-                .requestMatchers("/api/ws-live/**").permitAll()
+                        // Public API endpoints
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/api/ws-live/**").permitAll()
 
-                // OAuth2 endpoints (must be open for redirect flow)
-                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        // OAuth2 endpoints (must be open for redirect flow)
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
 
-                // Protected API routes
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+                        // Protected API routes
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
 
-                // Traditional Thymeleaf admin/customer routes
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/customer/**").hasRole("CUSTOMER")
+                        // Traditional Thymeleaf admin/customer routes
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/customer/**").hasRole("CUSTOMER")
 
-                // Public Thymeleaf pages
-                .requestMatchers(
-                    "/", "/login", "/register", "/about", "/contact",
-                    "/products", "/products/**",
-                    "/wishlist-unauth", "/cart-unauth",
-                    "/custom-request", "/confirm-otp",
-                    "/forgot-password", "/reset-otp", "/reset-password",
-                    "/newsletter/subscribe",
-                    "/policy_return", "/policy_privacy", "/policy_terms", "/policy_shipping",
-                    "/customer/profile/verify-new-email",
-                    "/css/**", "/js/**", "/images/**", "/static/**",
-                    "/favicon.ico"
-                ).permitAll()
+                        // Public Thymeleaf pages
+                        .requestMatchers(
+                                "/", "/login", "/register", "/about", "/contact",
+                                "/products", "/products/**",
+                                "/wishlist-unauth", "/cart-unauth",
+                                "/custom-request", "/confirm-otp",
+                                "/forgot-password", "/reset-otp", "/reset-password",
+                                "/newsletter/subscribe",
+                                "/policy_return", "/policy_privacy", "/policy_terms", "/policy_shipping",
+                                "/customer/profile/verify-new-email",
+                                "/css/**", "/js/**", "/images/**", "/static/**",
+                                "/favicon.ico")
+                        .permitAll()
 
-                .anyRequest().authenticated()
-            )
+                        .anyRequest().authenticated())
 
-            // ── Form login (Thymeleaf pages) ──────────────────────────────────
-            .formLogin(form -> form
-                .loginPage("/login")
-                .permitAll()
-                .failureHandler(authenticationFailureHandler())
-                .successHandler((request, response, authentication) -> {
-                    boolean isAdmin = authentication.getAuthorities().stream()
-                        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-                    response.sendRedirect(isAdmin ? "/admin/dashboard" : "/");
-                })
-            )
+                // ── Form login (Thymeleaf pages) ──────────────────────────────────
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
+                        .failureHandler(authenticationFailureHandler())
+                        .successHandler((request, response, authentication) -> {
+                            boolean isAdmin = authentication.getAuthorities().stream()
+                                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                            response.sendRedirect(isAdmin ? "/admin/dashboard" : "/");
+                        }))
 
-            // ── OAuth2 login (Google etc.) ────────────────────────────────────
-            .oauth2Login(oauth2 -> oauth2
-                .loginPage("/login")
-                .userInfoEndpoint(userInfo -> userInfo
-                    .userService(customOAuth2UserService)
-                )
-                .successHandler((request, response, authentication) -> {
-                    // Extract email from the OAuth2 user
-                    String email = null;
-                    if (authentication.getPrincipal() instanceof OAuth2User oauthUser) {
-                        email = (String) oauthUser.getAttributes().get("email");
-                    }
-                    if (email == null) {
-                        email = authentication.getName();
-                    }
+                // ── OAuth2 login (Google etc.) ────────────────────────────────────
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService))
+                        .successHandler((request, response, authentication) -> {
+                            // Extract email from the OAuth2 user
+                            String email = null;
+                            if (authentication.getPrincipal() instanceof OAuth2User oauthUser) {
+                                email = (String) oauthUser.getAttributes().get("email");
+                            }
+                            if (email == null) {
+                                email = authentication.getName();
+                            }
 
-                    // Find the user in DB (created by CustomOAuth2UserService)
-                    Optional<User> userOpt = userRepository.findByUsername(email);
-                    if (userOpt.isPresent()) {
-                        User user = userOpt.get();
-                        String role = user.getRole() != null ? user.getRole().toString() : "CUSTOMER";
+                            // Find the user in DB (created by CustomOAuth2UserService)
+                            Optional<User> userOpt = userRepository.findByUsername(email);
+                            if (userOpt.isPresent()) {
+                                User user = userOpt.get();
+                                String role = user.getRole() != null ? user.getRole().toString() : "CUSTOMER";
 
-                        // Build a UserDetails for JWT generation
-                        org.springframework.security.core.userdetails.UserDetails ud =
-                            org.springframework.security.core.userdetails.User
-                                .withUsername(user.getUsername())
-                                .password("{noop}OAUTH2")
-                                .roles(role)
-                                .build();
+                                // Build a UserDetails for JWT generation
+                                org.springframework.security.core.userdetails.UserDetails ud = org.springframework.security.core.userdetails.User
+                                        .withUsername(user.getUsername())
+                                        .password("{noop}OAUTH2")
+                                        .roles(role)
+                                        .build();
 
-                        // Generate JWT token with role claim
-                        java.util.Map<String, Object> extraClaims = new java.util.HashMap<>();
-                        extraClaims.put("role", role);
-                        String accessToken = jwtUtil.generateToken(extraClaims, ud);
+                                // Generate JWT token with role claim
+                                java.util.Map<String, Object> extraClaims = new java.util.HashMap<>();
+                                extraClaims.put("role", role);
+                                String accessToken = jwtUtil.generateToken(extraClaims, ud);
 
-                        // IMPORTANT: Pass token as URL param because the backend (port 8080)
-                        // and frontend (port 3000) are on different origins. A cookie set in
-                        // this redirect response would be stored under localhost:8080 and
-                        // would NOT be sent when the React proxy forwards requests from 3000.
-                        response.sendRedirect(
-                            oauth2SuccessRedirectUrl + "?token=" + accessToken
-                        );
-                    } else {
-                        System.err.println("OAuth2 success handler: user not found in DB for email: " + email);
-                        response.sendRedirect(oauth2FailureRedirectUrl);
-                    }
-                })
-                .failureHandler((request, response, exception) -> {
-                    System.err.println("OAuth2 login failed: " + exception.getMessage());
-                    response.sendRedirect(oauth2FailureRedirectUrl);
-                })
-            )
+                                // IMPORTANT: Pass token as URL param because the backend (port 8080)
+                                // and frontend (port 3000) are on different origins. A cookie set in
+                                // this redirect response would be stored under localhost:8080 and
+                                // would NOT be sent when the React proxy forwards requests from 3000.
+                                response.sendRedirect(
+                                        oauth2SuccessRedirectUrl + "?token=" + accessToken);
+                            } else {
+                                System.err.println("OAuth2 success handler: user not found in DB for email: " + email);
+                                response.sendRedirect(oauth2FailureRedirectUrl);
+                            }
+                        })
+                        .failureHandler((request, response, exception) -> {
+                            System.err.println("OAuth2 login failed: " + exception.getMessage());
+                            response.sendRedirect(oauth2FailureRedirectUrl);
+                        }))
 
-            // ── Logout ────────────────────────────────────────────────────────
-            .logout(logout -> logout
-                .logoutUrl("/api/auth/logout")
-                .permitAll()
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    response.setStatus(200);
-                })
-                .deleteCookies("JSESSIONID", "accessToken", "refreshToken")
-            )
+                // ── Logout ────────────────────────────────────────────────────────
+                .logout(logout -> logout
+                        .logoutUrl("/api/auth/logout")
+                        .permitAll()
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(200);
+                        })
+                        .deleteCookies("JSESSIONID", "accessToken", "refreshToken"))
 
-            // ── Exception handling: return 401 JSON for API callers ───────────
-            .exceptionHandling(exceptions -> exceptions
-                // For /api/** requests: return HTTP 401 — never redirect
-                .defaultAuthenticationEntryPointFor(
-                    new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                    request -> request.getServletPath().startsWith("/api/")
-                )
-            )
+                // ── Exception handling: return 401 JSON for API callers ───────────
+                .exceptionHandling(exceptions -> exceptions
+                        // For /api/** requests: return HTTP 401 — never redirect
+                        .defaultAuthenticationEntryPointFor(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                                request -> request.getServletPath().startsWith("/api/")))
 
-            // ── Security headers ──────────────────────────────────────────────
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin())
-            );
+                // ── Security headers ──────────────────────────────────────────────
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin()));
 
         return http.build();
     }

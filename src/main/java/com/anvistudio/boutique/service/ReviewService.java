@@ -22,7 +22,8 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
 
-    public ReviewService(ReviewRepository reviewRepository, UserRepository userRepository, ProductRepository productRepository) {
+    public ReviewService(ReviewRepository reviewRepository, UserRepository userRepository,
+            ProductRepository productRepository) {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
@@ -30,10 +31,11 @@ public class ReviewService {
 
     /**
      * Submits a new review or updates an existing one by a customer.
-     * @param username The authenticated user's username.
+     * 
+     * @param username  The authenticated user's username.
      * @param productId The ID of the product being reviewed.
-     * @param rating The rating (1-5).
-     * @param comment The review text.
+     * @param rating    The rating (1-5).
+     * @param comment   The review text.
      * @return The persisted Review entity.
      */
     @Transactional
@@ -77,7 +79,8 @@ public class ReviewService {
 
     /**
      * NEW: Checks if a user has already reviewed a specific product.
-     * @param username The user's username (email).
+     * 
+     * @param username  The user's username (email).
      * @param productId The product ID.
      * @return true if the user has already reviewed this product, false otherwise.
      */

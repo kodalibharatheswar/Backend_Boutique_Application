@@ -18,7 +18,8 @@ public class CartService {
     private final UserService userService;
     private final ProductRepository productRepository;
 
-    public CartService(CartItemRepository cartItemRepository, UserService userService, ProductRepository productRepository) {
+    public CartService(CartItemRepository cartItemRepository, UserService userService,
+            ProductRepository productRepository) {
         this.cartItemRepository = cartItemRepository;
         this.userService = userService;
         this.productRepository = productRepository;
@@ -26,13 +27,15 @@ public class CartService {
 
     /**
      * Adds a product to the cart or increments quantity if it exists.
-     * @param username The username of the user.
+     * 
+     * @param username  The username of the user.
      * @param productId The ID of the product.
-     * @param quantity The amount to add (usually 1).
+     * @param quantity  The amount to add (usually 1).
      */
     @Transactional
     public void addProductToCart(String username, Long productId, int quantity) {
-        if (quantity <= 0) return;
+        if (quantity <= 0)
+            return;
 
         User user = userService.findUserByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
@@ -88,7 +91,8 @@ public class CartService {
 
     /**
      * Calculates the total price for all items in the cart.
-     * This method automatically uses the updated CartItem.getTotalPrice() calculation.
+     * This method automatically uses the updated CartItem.getTotalPrice()
+     * calculation.
      */
     public double getCartTotal(Long userId) {
         return getCartItems(userId).stream()

@@ -15,8 +15,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Service to interface with the Stripe API for custom Payment Element integration.
- * This uses Payment Intents instead of Checkout Sessions (which were used previously).
+ * Service to interface with the Stripe API for custom Payment Element
+ * integration.
+ * This uses Payment Intents instead of Checkout Sessions (which were used
+ * previously).
  */
 @Service
 public class StripeService {
@@ -43,7 +45,8 @@ public class StripeService {
     }
 
     /**
-     * Helper to ensure the image URL is absolute for Stripe's API. (Retained from previous fix)
+     * Helper to ensure the image URL is absolute for Stripe's API. (Retained from
+     * previous fix)
      */
     private String makeAbsoluteUrl(String relativeUrl) {
         if (relativeUrl == null || relativeUrl.isEmpty()) {
@@ -56,9 +59,11 @@ public class StripeService {
     }
 
     /**
-     * NEW: Creates a Payment Intent and returns the client secret for the frontend Payment Element.
+     * NEW: Creates a Payment Intent and returns the client secret for the frontend
+     * Payment Element.
      * This replaces the old createCheckoutSession method.
      * * @param username The authenticated user's username (email).
+     * 
      * @return The client secret string.
      * @throws StripeException If the Stripe API call fails.
      */
@@ -79,7 +84,8 @@ public class StripeService {
                 .longValue();
 
         // 1. Create or retrieve Stripe Customer ID
-        // NOTE: This assumes we successfully create a customer every time, which is fine for test mode.
+        // NOTE: This assumes we successfully create a customer every time, which is
+        // fine for test mode.
         String customerId = getOrCreateStripeCustomer(user.getUsername(), user.getUsername()).getId();
 
         // 2. Build the Payment Intent Parameters
@@ -87,9 +93,11 @@ public class StripeService {
                 .setAmount(amountInCents)
                 .setCurrency(currency)
                 .setCustomer(customerId)
-                .setSetupFutureUsage(PaymentIntentCreateParams.SetupFutureUsage.ON_SESSION) // Saves card for future purchases
-                // REMOVED: .addPaymentMethodType("card") - This conflicts with automatic methods
-                .setDescription("Anvi Studio Order for " + user.getUsername())
+                .setSetupFutureUsage(PaymentIntentCreateParams.SetupFutureUsage.ON_SESSION) // Saves card for future
+                                                                                            // purchases
+                // REMOVED: .addPaymentMethodType("card") - This conflicts with automatic
+                // methods
+                .setDescription("anvi Studio Order for " + user.getUsername())
                 .setReceiptEmail(user.getUsername())
                 .putMetadata("cart_user_id", userId.toString()) // Reference to your internal system
                 .setAutomaticPaymentMethods(PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
@@ -104,10 +112,12 @@ public class StripeService {
 
     /**
      * Helper to get a Stripe Customer or create one if not found.
-     * In a production app, the Customer ID would be stored on your local User model.
+     * In a production app, the Customer ID would be stored on your local User
+     * model.
      */
     private Customer getOrCreateStripeCustomer(String email, String name) throws StripeException {
-        // Simple search by email. In a real app, use the user's saved Stripe Customer ID.
+        // Simple search by email. In a real app, use the user's saved Stripe Customer
+        // ID.
         CustomerCreateParams params = CustomerCreateParams.builder()
                 .setEmail(email)
                 .setName(name)

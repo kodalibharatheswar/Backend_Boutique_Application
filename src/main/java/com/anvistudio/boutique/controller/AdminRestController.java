@@ -37,9 +37,9 @@ public class AdminRestController {
     private final ReviewService reviewService;
     private final ShippingIntegrationService shippingService;
 
-    public AdminRestController(ProductService productService, UserService userService, 
-                              ContactService contactService, OrderService orderService, 
-                              ReviewService reviewService, ShippingIntegrationService shippingService) {
+    public AdminRestController(ProductService productService, UserService userService,
+            ContactService contactService, OrderService orderService,
+            ReviewService reviewService, ShippingIntegrationService shippingService) {
         this.productService = productService;
         this.userService = userService;
         this.contactService = contactService;
@@ -67,17 +67,17 @@ public class AdminRestController {
             // Calculate statistics
             long totalOrders = allOrders.size();
             long pendingOrders = allOrders.stream()
-                .filter(o -> o.getStatus() == Order.OrderStatus.PENDING || 
+                    .filter(o -> o.getStatus() == Order.OrderStatus.PENDING ||
                             o.getStatus() == Order.OrderStatus.PROCESSING ||
                             o.getStatus() == Order.OrderStatus.CONFIRMED)
-                .count();
+                    .count();
             long returnRequests = allOrders.stream()
-                .filter(o -> o.getStatus() == Order.OrderStatus.RETURN_REQUESTED)
-                .count();
+                    .filter(o -> o.getStatus() == Order.OrderStatus.RETURN_REQUESTED)
+                    .count();
             long totalProducts = allProducts.size();
             long lowStockProducts = allProducts.stream()
-                .filter(p -> p.getStockQuantity() < 10)
-                .count();
+                    .filter(p -> p.getStockQuantity() < 10)
+                    .count();
             long pendingReviews = unapprovedReviews.size();
             long unreadMessages = allMessages.size();
 
@@ -115,7 +115,7 @@ public class AdminRestController {
     public ResponseEntity<?> getAllOrders() {
         try {
             List<Order> orders = orderService.getAllOrders();
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("orders", orders);
@@ -139,14 +139,14 @@ public class AdminRestController {
             @RequestBody Map<String, String> request) {
         try {
             String newStatus = request.get("newStatus");
-            
+
             Order order = orderService.getOrderById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+                    .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
             Order.OrderStatus status = Order.OrderStatus.valueOf(newStatus);
             order.setStatus(status);
             orderService.saveOrder(order);
-            
+
             if (status == Order.OrderStatus.PACKED) {
                 // Simulate pushing order to shipping partner
                 shippingService.createShippingLabel(order);
@@ -179,7 +179,7 @@ public class AdminRestController {
     public ResponseEntity<?> finalizeReturn(@PathVariable Long orderId) {
         try {
             Order order = orderService.getOrderById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+                    .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
             if (order.getStatus() != Order.OrderStatus.RETURN_REQUESTED) {
                 throw new IllegalStateException("Order must be RETURN_REQUESTED to finalize return");
@@ -221,7 +221,7 @@ public class AdminRestController {
     public ResponseEntity<?> getUnapprovedReviews() {
         try {
             List<Review> reviews = reviewService.getUnapprovedReviews();
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("reviews", reviews);
@@ -291,7 +291,7 @@ public class AdminRestController {
     public ResponseEntity<?> getProducts(@RequestParam(required = false) String category) {
         try {
             List<Product> products = productService.getProductsByCategoryOrAll(category);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("products", products);
@@ -314,7 +314,7 @@ public class AdminRestController {
     public ResponseEntity<?> getProductById(@PathVariable Long id) {
         try {
             Optional<Product> productOpt = productService.getProductById(id);
-            
+
             if (productOpt.isEmpty()) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("success", false);
@@ -413,10 +413,10 @@ public class AdminRestController {
      */
     @GetMapping("/categories")
     public ResponseEntity<?> getCategories() {
-        String[] categories = new String[]{
-            "Sarees", "Lehengas", "Kurtis", "Long Frocks", "Mom & Me", "Crop Top – Skirts",
-            "Handlooms", "Casual Frocks", "Ready To Wear", "Dupattas", "Kids wear",
-            "Dress Material", "Blouses", "Fabrics"
+        String[] categories = new String[] {
+                "Sarees", "Lehengas", "Kurtis", "Long Frocks", "Mom & Me", "Crop Top – Skirts",
+                "Handlooms", "Casual Frocks", "Ready To Wear", "Dupattas", "Kids wear",
+                "Dress Material", "Blouses", "Fabrics"
         };
 
         Map<String, Object> response = new HashMap<>();
@@ -437,7 +437,7 @@ public class AdminRestController {
     public ResponseEntity<?> getContactMessages() {
         try {
             List<ContactMessage> messages = contactService.getAllMessages();
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("messages", messages);
@@ -486,7 +486,7 @@ public class AdminRestController {
         try {
             String username = userDetails.getUsername();
             Optional<User> adminUserOpt = userService.findUserByUsername(username);
-            
+
             if (adminUserOpt.isEmpty()) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("success", false);
@@ -495,8 +495,8 @@ public class AdminRestController {
             }
 
             User admin = adminUserOpt.get();
-            boolean needsUpdate = !userService.isAdminCredentialsUpdated(username) 
-                                 && "admin".equals(username);
+            boolean needsUpdate = !userService.isAdminCredentialsUpdated(username)
+                    && "admin".equals(username);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -525,11 +525,10 @@ public class AdminRestController {
             String currentUsername = userDetails.getUsername();
 
             userService.updateAdminCredentials(
-                currentUsername,
-                updateDTO.getNewUsername(),
-                updateDTO.getNewPassword(),
-                updateDTO.getRecoveryPhoneNumber()
-            );
+                    currentUsername,
+                    updateDTO.getNewUsername(),
+                    updateDTO.getNewPassword(),
+                    updateDTO.getRecoveryPhoneNumber());
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);

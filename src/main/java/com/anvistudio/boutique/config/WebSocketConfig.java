@@ -12,9 +12,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Use /topic for broadcasting messages (e.g., /topic/live.chat, /topic/live.viewers)
+        // Use /topic for broadcasting messages (e.g., /topic/live.chat,
+        // /topic/live.viewers)
         config.enableSimpleBroker("/topic");
-        // Use /app for messages bound for methods annotated with @MessageMapping (e.g., /app/chat.send)
+        // Use /app for messages bound for methods annotated with @MessageMapping (e.g.,
+        // /app/chat.send)
         config.setApplicationDestinationPrefixes("/app");
     }
 

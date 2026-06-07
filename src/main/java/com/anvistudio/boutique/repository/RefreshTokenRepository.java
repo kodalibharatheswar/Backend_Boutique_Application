@@ -16,10 +16,10 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     /**
      * Direct JPQL delete — executes immediately and flushes from the persistence
-     * context, avoiding duplicate-key errors when a new token is inserted right after.
+     * context, avoiding duplicate-key errors when a new token is inserted right
+     * after.
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM RefreshToken rt WHERE rt.user.id = :userId")
     void deleteAllByUserId(@Param("userId") Long userId);
 }
-

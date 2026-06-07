@@ -25,7 +25,8 @@ public class OrderService {
     // Standard 7-day return window in milliseconds
     private static final long RETURN_WINDOW_MILLIS = TimeUnit.DAYS.toMillis(7);
 
-    public OrderService(OrderRepository orderRepository, UserService userService, OrderTrackingRepository orderTrackingRepository) {
+    public OrderService(OrderRepository orderRepository, UserService userService,
+            OrderTrackingRepository orderTrackingRepository) {
         this.orderRepository = orderRepository;
         this.userService = userService;
         this.orderTrackingRepository = orderTrackingRepository;
@@ -62,13 +63,15 @@ public class OrderService {
     }
 
     /**
-     * NEW: Utility method to save an Order (used by AdminController for status updates).
+     * NEW: Utility method to save an Order (used by AdminController for status
+     * updates).
      */
     @Transactional
     public Order saveOrder(Order order) {
         Order savedOrder = orderRepository.save(order);
         // Log the status update
-        OrderTracking tracking = new OrderTracking(savedOrder, savedOrder.getStatus(), "Processing Center", "Order status updated to " + savedOrder.getStatus());
+        OrderTracking tracking = new OrderTracking(savedOrder, savedOrder.getStatus(), "Processing Center",
+                "Order status updated to " + savedOrder.getStatus());
         orderTrackingRepository.save(tracking);
         return savedOrder;
     }
@@ -87,11 +90,13 @@ public class OrderService {
 
         order.setStatus(Order.OrderStatus.CANCELLED);
         Order savedOrder = orderRepository.save(order);
-        
-        OrderTracking tracking = new OrderTracking(savedOrder, Order.OrderStatus.CANCELLED, "", "Order cancelled by user.");
+
+        OrderTracking tracking = new OrderTracking(savedOrder, Order.OrderStatus.CANCELLED, "",
+                "Order cancelled by user.");
         orderTrackingRepository.save(tracking);
 
-        System.out.println("LOG: Order " + orderId + " cancelled. Initiating refund for amount: " + order.getTotalAmount());
+        System.out.println(
+                "LOG: Order " + orderId + " cancelled. Initiating refund for amount: " + order.getTotalAmount());
         // TODO: Trigger Refund Process (Stripe API call would happen here)
     }
 
@@ -117,8 +122,9 @@ public class OrderService {
         // 2. Set Status to Return Requested
         order.setStatus(Order.OrderStatus.RETURN_REQUESTED);
         Order savedOrder = orderRepository.save(order);
-        
-        OrderTracking tracking = new OrderTracking(savedOrder, Order.OrderStatus.RETURN_REQUESTED, "", "Return requested by customer.");
+
+        OrderTracking tracking = new OrderTracking(savedOrder, Order.OrderStatus.RETURN_REQUESTED, "",
+                "Return requested by customer.");
         orderTrackingRepository.save(tracking);
 
         System.out.println("LOG: Order " + orderId + " return requested. Awaiting admin approval.");
@@ -147,8 +153,8 @@ public class OrderService {
                         item.getTotalPrice()))
                 .collect(Collectors.joining("; "));
 
-        // For demo purposes, we can assume addressId comes from frontend. 
-        // In a real app we'd fetch the Address entity. 
+        // For demo purposes, we can assume addressId comes from frontend.
+        // In a real app we'd fetch the Address entity.
         String shippingAddressSnapshot = "Shipping Address ID: " + addressId;
 
         Order newOrder = new Order();
@@ -160,15 +166,17 @@ public class OrderService {
         newOrder.setOrderItemsSnapshot(orderItemsSnapshot);
 
         Order savedOrder = orderRepository.saveAndFlush(newOrder);
-        
-        OrderTracking tracking = new OrderTracking(savedOrder, Order.OrderStatus.PENDING, "", "Order placed successfully.");
+
+        OrderTracking tracking = new OrderTracking(savedOrder, Order.OrderStatus.PENDING, "",
+                "Order placed successfully.");
         orderTrackingRepository.saveAndFlush(tracking);
-        
+
         // Auto-move to processing for demo
         savedOrder.setStatus(Order.OrderStatus.PROCESSING);
         savedOrder = orderRepository.saveAndFlush(savedOrder);
-        
-        OrderTracking processingTracking = new OrderTracking(savedOrder, Order.OrderStatus.PROCESSING, "Fulfillment Center", "Order is being processed.");
+
+        OrderTracking processingTracking = new OrderTracking(savedOrder, Order.OrderStatus.PROCESSING,
+                "Fulfillment Center", "Order is being processed.");
         orderTrackingRepository.saveAndFlush(processingTracking);
 
         return savedOrder;

@@ -6,7 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuration class to initialize the Stripe API key globally on application startup.
+ * Configuration class to initialize the Stripe API key globally on application
+ * startup.
  */
 @Configuration
 public class StripeConfig {
@@ -16,7 +17,8 @@ public class StripeConfig {
     private String stripeSecretKey;
 
     /**
-     * Initializes the Stripe API key. This method runs after bean properties are set.
+     * Initializes the Stripe API key. This method runs after bean properties are
+     * set.
      */
     @PostConstruct
     public void init() {

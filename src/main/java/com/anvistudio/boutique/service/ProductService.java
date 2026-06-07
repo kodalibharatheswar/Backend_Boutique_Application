@@ -19,11 +19,13 @@ public class ProductService {
     private final NotificationService notificationService; // NEW INJECTION
 
     public ProductService(ProductRepository productRepository, CartItemRepository cartItemRepository,
-                          WishlistRepository wishlistRepository, NotificationService notificationService) { // NEW CONSTRUCTOR PARAMETER
+            WishlistRepository wishlistRepository, NotificationService notificationService) { // NEW CONSTRUCTOR
+                                                                                              // PARAMETER
         this.productRepository = productRepository;
         this.cartItemRepository = cartItemRepository;
         this.wishlistRepository = wishlistRepository;
-        this.notificationService = notificationService; // <--- CRITICAL: Initialization was missing or incorrect previously
+        this.notificationService = notificationService; // <--- CRITICAL: Initialization was missing or incorrect
+                                                        // previously
     }
 
     /**
@@ -32,7 +34,6 @@ public class ProductService {
     public Optional<Product> getProductById(Long id) {
         return productRepository.findById(id);
     }
-
 
     /**
      * NEW: Retrieves only the image URL for a given product ID.
@@ -43,7 +44,6 @@ public class ProductService {
                 .orElse("https://placehold.co/80x80/f0f0f0/333?text=N%2FA");
     }
 
-
     /**
      * Retrieves all products (used for admin view).
      */
@@ -51,13 +51,12 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-
     // The getFilteredProducts method remains unchanged and is omitted for brevity.
-
 
     /**
      * Admin function: Saves a new product or updates an existing one.
-     * MODIFIED: Added logic to check for sale/clearance status and trigger notification.
+     * MODIFIED: Added logic to check for sale/clearance status and trigger
+     * notification.
      */
     @Transactional
     public Product saveProduct(Product product) {
@@ -87,11 +86,11 @@ public class ProductService {
         return savedProduct;
     }
 
-
     /**
      * Retrieves products based on multiple filter and sort criteria.
      */
-    public List<Product> getFilteredProducts(String category, String sortBy, Double minPrice, Double maxPrice, String status, String color, String keyword) {
+    public List<Product> getFilteredProducts(String category, String sortBy, Double minPrice, Double maxPrice,
+            String status, String color, String keyword) {
         List<Product> products;
 
         // 1. Base Retrieval (Filter by Keyword first for broad search, or Category)
@@ -109,8 +108,10 @@ public class ProductService {
             products.removeIf(p -> {
                 // *** FIX: Use discounted price for comparison in price range filtering ***
                 double price = p.getDiscountedPrice().doubleValue();
-                if (minPrice != null && price < minPrice) return true;
-                if (maxPrice != null && price > maxPrice) return true;
+                if (minPrice != null && price < minPrice)
+                    return true;
+                if (maxPrice != null && price > maxPrice)
+                    return true;
                 return false;
             });
         }
@@ -118,9 +119,9 @@ public class ProductService {
         // 3. Filter by Color (In-memory filtering)
         if (color != null && !color.trim().isEmpty()) {
             final String normalizedColor = color.trim().toLowerCase();
-            products.removeIf(p -> p.getProductColor() == null || !p.getProductColor().toLowerCase().contains(normalizedColor));
+            products.removeIf(
+                    p -> p.getProductColor() == null || !p.getProductColor().toLowerCase().contains(normalizedColor));
         }
-
 
         // 4. Filter by Status (In-memory filtering)
         if (status != null && !status.isEmpty()) {
@@ -129,7 +130,8 @@ public class ProductService {
                     products.removeIf(p -> p.getStockQuantity() <= 0 || !p.getIsAvailable());
                     break;
                 case "lowStock":
-                    products.removeIf(p -> p.getStockQuantity() <= 0 || p.getStockQuantity() > 5 || !p.getIsAvailable());
+                    products.removeIf(
+                            p -> p.getStockQuantity() <= 0 || p.getStockQuantity() > 5 || !p.getIsAvailable());
                     break;
                 case "onSale":
                     products.removeIf(p -> p.getDiscountPercent() <= 0);
@@ -167,7 +169,6 @@ public class ProductService {
         return products;
     }
 
-
     /**
      * Retrieves the top 8 latest products for display (uses the sorting query).
      */
@@ -179,7 +180,8 @@ public class ProductService {
     }
 
     /**
-     * Retrieves products based on category, or all products if category is null/empty.
+     * Retrieves products based on category, or all products if category is
+     * null/empty.
      */
     public List<Product> getProductsByCategoryOrAll(String category) {
         if (category != null && !category.trim().isEmpty()) {

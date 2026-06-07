@@ -18,12 +18,13 @@ public class JwtUtil {
 
     /**
      * Secret configured in application.properties as a HEX string.
-     * Example value: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+     * Example value:
+     * 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
      */
     @Value("${jwt.secret:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}")
     private String secret;
 
-    @Value("${jwt.expiration:3600000}")         // 1 hour in milliseconds
+    @Value("${jwt.expiration:3600000}") // 1 hour in milliseconds
     private long jwtExpiration;
 
     @Value("${jwt.refresh-expiration:604800000}") // 7 days in milliseconds

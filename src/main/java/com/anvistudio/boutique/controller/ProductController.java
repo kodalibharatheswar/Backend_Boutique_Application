@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Handles endpoints related to the product catalog, individual product pages, and product reviews.
+ * Handles endpoints related to the product catalog, individual product pages,
+ * and product reviews.
  */
 @Controller
 public class ProductController {
@@ -29,11 +30,10 @@ public class ProductController {
         this.reviewService = reviewService;
     }
 
-
     // --- Helper method to define all available categories ---
     private String[] getAllCategories() {
         // Must match the list used in AdminController and navigation dropdowns
-        return new String[]{
+        return new String[] {
                 "Sarees", "Lehengas", "Kurtis", "Long Frocks", "Mom & Me", "Crop Top – Skirts",
                 "Handlooms", "Casual Frocks", "Ready To Wear", "Dupattas", "Kids wear",
                 "Dress Material", "Blouses", "Fabrics"
@@ -42,9 +42,9 @@ public class ProductController {
 
     // --- Helper method to define available filter colors ---
     private String[] getFilterColors() {
-        return new String[]{"Black", "Blue", "Green", "Red", "Pink", "Yellow", "Maroon", "Purple", "White", "Gray", "Brown", "Orange"};
+        return new String[] { "Black", "Blue", "Green", "Red", "Pink", "Yellow", "Maroon", "Purple", "White", "Gray",
+                "Brown", "Orange" };
     }
-
 
     /**
      * Displays the product listing page with filtering and sorting options.
@@ -107,8 +107,8 @@ public class ProductController {
         model.addAttribute("reviewCount", reviewService.getReviewCount(id));
         model.addAttribute("reviews", reviewService.getApprovedReviewsForProduct(id));
 
-
-        // Suggest related products based on category (using the first 4 from the same category)
+        // Suggest related products based on category (using the first 4 from the same
+        // category)
         List<Product> relatedProducts = productService.getProductsByCategoryOrAll(product.getCategory());
         // Filter out the current product and take up to 4 related items
         relatedProducts.removeIf(p -> p.getId().equals(id));
@@ -135,11 +135,13 @@ public class ProductController {
 
         try {
             reviewService.submitReview(userDetails.getUsername(), productId, rating, comment);
-            redirectAttributes.addFlashAttribute("successMessage", "Review submitted! It will appear once approved by our team.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Review submitted! It will appear once approved by our team.");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to submit review. An unexpected error occurred.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Failed to submit review. An unexpected error occurred.");
             System.err.println("Review submission error: " + e.getMessage());
         }
 

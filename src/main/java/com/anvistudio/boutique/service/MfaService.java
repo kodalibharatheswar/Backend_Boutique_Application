@@ -26,7 +26,8 @@ public class MfaService {
      * Generates a Google Authenticator QR code URL.
      */
     public String getQrCodeUrl(String secret, String email) {
-        return GoogleAuthenticatorQRGenerator.getOtpAuthURL("Anvi Boutique", email, new GoogleAuthenticatorKey.Builder(secret).build());
+        return GoogleAuthenticatorQRGenerator.getOtpAuthURL("anvi Boutique", email,
+                new GoogleAuthenticatorKey.Builder(secret).build());
     }
 
     /**

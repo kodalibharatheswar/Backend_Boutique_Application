@@ -24,7 +24,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findByUserIdAndProductId(Long userId, Long productId);
 
     /**
-     * Calculates the average rating for a specific product based on approved reviews.
+     * Calculates the average rating for a specific product based on approved
+     * reviews.
      */
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.product.id = :productId AND r.isApproved = true")
     Optional<Double> findAverageRatingByProductId(@Param("productId") Long productId);

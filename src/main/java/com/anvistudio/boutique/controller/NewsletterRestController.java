@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * REST API Controller to handle newsletter subscriptions from non-registered users.
+ * REST API Controller to handle newsletter subscriptions from non-registered
+ * users.
  */
 @RestController
 @RequestMapping("/api/public/newsletter")
@@ -30,30 +31,31 @@ public class NewsletterRestController {
     @PostMapping("/subscribe")
     public ResponseEntity<Map<String, Object>> subscribe(@RequestBody NewsletterSubscriptionRequest request) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             String email = request.getEmail();
-            
+
             // Validation
             if (email == null || email.trim().isEmpty() || !email.contains("@")) {
                 throw new IllegalStateException("Please enter a valid email address.");
             }
-            
+
             // This is the correct logic for non-registered users (saves to generic table)
             notificationService.subscribeEmail(email);
-            
+
             response.put("success", true);
             response.put("message", "Thank you! You are now subscribed to our exclusive offers.");
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalStateException e) {
             // Handle specific error cases
             String message = e.getMessage();
-            
+
             if (message.contains("already registered as a customer")) {
                 // Provide actionable message for registered customers
                 response.put("success", false);
-                response.put("message", "You are already a registered customer. Please log in and manage your subscription preferences on your profile page.");
+                response.put("message",
+                        "You are already a registered customer. Please log in and manage your subscription preferences on your profile page.");
                 response.put("isRegisteredUser", true);
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
             } else {
@@ -61,14 +63,14 @@ public class NewsletterRestController {
                 response.put("message", message);
                 return ResponseEntity.badRequest().body(response);
             }
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Subscription failed. Please try again later.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     /**
      * Inner class for newsletter subscription request
      */

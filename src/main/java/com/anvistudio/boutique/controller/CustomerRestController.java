@@ -18,7 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * REST API Controller for customer-specific operations, requiring ROLE_CUSTOMER access.
+ * REST API Controller for customer-specific operations, requiring ROLE_CUSTOMER
+ * access.
  */
 @RestController
 @RequestMapping("/api/customer")
@@ -35,10 +36,10 @@ public class CustomerRestController {
     private final ReviewService reviewService;
 
     public CustomerRestController(ProductService productService, UserService userService,
-                                  CartService cartService, WishlistService wishlistService,
-                                  OrderService orderService, AddressService addressService,
-                                  CouponService couponService, GiftCardService giftCardService,
-                                  ReviewService reviewService) {
+            CartService cartService, WishlistService wishlistService,
+            OrderService orderService, AddressService addressService,
+            CouponService couponService, GiftCardService giftCardService,
+            ReviewService reviewService) {
         this.productService = productService;
         this.userService = userService;
         this.cartService = cartService;
@@ -61,15 +62,15 @@ public class CustomerRestController {
     @GetMapping("/orders")
     public ResponseEntity<Map<String, Object>> showMyOrders(@AuthenticationPrincipal UserDetails userDetails) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             String username = userDetails.getUsername();
             List<Order> orders = orderService.getOrdersByUsername(username);
-            
+
             response.put("success", true);
             response.put("orders", orders);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Could not load order history: " + e.getMessage());
@@ -82,29 +83,30 @@ public class CustomerRestController {
      * Retrieves tracking history for a specific order
      */
     @GetMapping("/orders/{orderId}/tracking")
-    public ResponseEntity<Map<String, Object>> getOrderTracking(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long orderId) {
+    public ResponseEntity<Map<String, Object>> getOrderTracking(@AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long orderId) {
         Map<String, Object> response = new HashMap<>();
         try {
             String username = userDetails.getUsername();
             Optional<Order> orderOptional = orderService.getOrderById(orderId);
-            
+
             if (orderOptional.isEmpty()) {
                 response.put("success", false);
                 response.put("message", "Order not found.");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
-            
+
             Order order = orderOptional.get();
             if (!order.getUser().getUsername().equals(username)) {
                 response.put("success", false);
                 response.put("message", "Unauthorized access to order.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
             }
-            
+
             response.put("success", true);
             response.put("tracking", orderService.getTrackingHistory(orderId));
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Could not load tracking history: " + e.getMessage());
@@ -120,7 +122,7 @@ public class CustomerRestController {
     public ResponseEntity<Map<String, Object>> submitOrderProductReview(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody ReviewSubmissionRequest request) {
-        
+
         Map<String, Object> response = new HashMap<>();
         String username = userDetails.getUsername();
 
@@ -162,7 +164,7 @@ public class CustomerRestController {
 
             // 5. Submit the review
             reviewService.submitReview(username, request.getProductId(), request.getRating(), request.getComment());
-            
+
             response.put("success", true);
             response.put("message", "Thank you! Your review has been submitted for approval.");
             return ResponseEntity.ok(response);
@@ -185,14 +187,15 @@ public class CustomerRestController {
     @PostMapping("/order/cancel/{orderId}")
     public ResponseEntity<Map<String, Object>> cancelOrder(@PathVariable Long orderId) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             orderService.cancelOrder(orderId);
-            
+
             response.put("success", true);
-            response.put("message", "Order #" + orderId + " has been successfully cancelled. A refund process has been initiated.");
+            response.put("message",
+                    "Order #" + orderId + " has been successfully cancelled. A refund process has been initiated.");
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalStateException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
@@ -210,16 +213,17 @@ public class CustomerRestController {
      */
     @PostMapping("/order/return/{orderId}")
     public ResponseEntity<Map<String, Object>> requestOrderReturn(@PathVariable Long orderId) {
-        
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             orderService.returnOrder(orderId);
-            
+
             response.put("success", true);
-            response.put("message", "Return request for Order #" + orderId + " submitted successfully. Awaiting confirmation!");
+            response.put("message",
+                    "Return request for Order #" + orderId + " submitted successfully. Awaiting confirmation!");
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalStateException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
@@ -242,23 +246,23 @@ public class CustomerRestController {
     @GetMapping("/profile")
     public ResponseEntity<Map<String, Object>> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             String username = userDetails.getUsername();
             Optional<Customer> customerOptional = userService.getCustomerDetailsByUsername(username);
-            
+
             if (customerOptional.isEmpty()) {
                 response.put("success", false);
                 response.put("message", "Customer not found");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
-            
+
             Customer customer = customerOptional.get();
-            
+
             response.put("success", true);
             response.put("customer", customer);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error loading profile: " + e.getMessage());
@@ -274,17 +278,17 @@ public class CustomerRestController {
     public ResponseEntity<Map<String, Object>> updateProfile(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody RegistrationDTO profileDTO) {
-        
+
         Map<String, Object> response = new HashMap<>();
         String currentUsername = userDetails.getUsername();
 
         try {
             userService.updateCustomerProfile(currentUsername, profileDTO);
-            
+
             response.put("success", true);
             response.put("message", "Profile details updated successfully!");
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalStateException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
@@ -304,22 +308,21 @@ public class CustomerRestController {
     public ResponseEntity<Map<String, Object>> changePassword(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody ChangePasswordRequest request) {
-        
+
         Map<String, Object> response = new HashMap<>();
 
         try {
             userService.changePassword(
-                userDetails.getUsername(), 
-                request.getCurrentPassword(), 
-                request.getNewPassword(), 
-                request.getConfirmPassword()
-            );
-            
+                    userDetails.getUsername(),
+                    request.getCurrentPassword(),
+                    request.getNewPassword(),
+                    request.getConfirmPassword());
+
             response.put("success", true);
             response.put("message", "Password changed successfully! Please log in with your new password.");
             response.put("requiresLogout", true);
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalStateException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
@@ -339,17 +342,17 @@ public class CustomerRestController {
     public ResponseEntity<Map<String, Object>> initiateEmailChange(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody EmailChangeRequest request) {
-        
+
         Map<String, Object> response = new HashMap<>();
 
         try {
             userService.initiateEmailChange(userDetails.getUsername(), request.getNewEmail());
-            
+
             response.put("success", true);
             response.put("message", "Verification code sent to " + request.getNewEmail() + ".");
             response.put("newEmail", request.getNewEmail());
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalStateException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
@@ -369,18 +372,19 @@ public class CustomerRestController {
     public ResponseEntity<Map<String, Object>> finalizeEmailChange(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody EmailVerificationRequest request) {
-        
+
         Map<String, Object> response = new HashMap<>();
 
         try {
             String currentUsername = userDetails.getUsername();
             userService.finalizeEmailChange(currentUsername, request.getNewEmail(), request.getOtp());
-            
+
             response.put("success", true);
-            response.put("message", "Your email address has been successfully updated to " + request.getNewEmail() + ". Please log in with your new email.");
+            response.put("message", "Your email address has been successfully updated to " + request.getNewEmail()
+                    + ". Please log in with your new email.");
             response.put("requiresLogout", true);
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalStateException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
@@ -400,17 +404,17 @@ public class CustomerRestController {
     public ResponseEntity<Map<String, Object>> updateNewsletterSubscription(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody NewsletterRequest request) {
-        
+
         Map<String, Object> response = new HashMap<>();
 
         try {
             userService.updateNewsletterOptIn(userDetails.getUsername(), request.isOptIn());
-            
+
             String status = request.isOptIn() ? "subscribed to" : "unsubscribed from";
             response.put("success", true);
             response.put("message", "You have successfully " + status + " the newsletter.");
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error updating newsletter status: " + e.getMessage());
@@ -429,15 +433,15 @@ public class CustomerRestController {
     @GetMapping("/addresses")
     public ResponseEntity<Map<String, Object>> getSavedAddresses(@AuthenticationPrincipal UserDetails userDetails) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             String username = userDetails.getUsername();
             List<Address> addresses = addressService.getAddressesByUsername(username);
-            
+
             response.put("success", true);
             response.put("addresses", addresses);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Could not load saved addresses.");
@@ -453,16 +457,16 @@ public class CustomerRestController {
     public ResponseEntity<Map<String, Object>> addOrUpdateAddress(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody Address address) {
-        
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             addressService.saveAddress(userDetails.getUsername(), address);
-            
+
             response.put("success", true);
             response.put("message", "Address saved successfully!");
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error saving address: " + e.getMessage());
@@ -477,14 +481,14 @@ public class CustomerRestController {
     @DeleteMapping("/addresses/delete/{id}")
     public ResponseEntity<Map<String, Object>> deleteAddress(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             addressService.deleteAddress(id);
-            
+
             response.put("success", true);
             response.put("message", "Address deleted successfully.");
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error deleting address.");
@@ -503,12 +507,12 @@ public class CustomerRestController {
     @GetMapping("/coupons")
     public ResponseEntity<Map<String, Object>> getCouponsAndOffers() {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             response.put("success", true);
             response.put("coupons", couponService.getAllActiveCoupons());
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Could not load coupons and offers.");
@@ -523,13 +527,13 @@ public class CustomerRestController {
     @GetMapping("/gift-cards")
     public ResponseEntity<Map<String, Object>> getGiftCards(@AuthenticationPrincipal UserDetails userDetails) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             String username = userDetails.getUsername();
             response.put("success", true);
             response.put("giftCards", giftCardService.getGiftCardsByUsername(username));
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Could not load gift card information.");
@@ -548,14 +552,37 @@ public class CustomerRestController {
         private String comment;
 
         // Getters and Setters
-        public Long getOrderId() { return orderId; }
-        public void setOrderId(Long orderId) { this.orderId = orderId; }
-        public Long getProductId() { return productId; }
-        public void setProductId(Long productId) { this.productId = productId; }
-        public int getRating() { return rating; }
-        public void setRating(int rating) { this.rating = rating; }
-        public String getComment() { return comment; }
-        public void setComment(String comment) { this.comment = comment; }
+        public Long getOrderId() {
+            return orderId;
+        }
+
+        public void setOrderId(Long orderId) {
+            this.orderId = orderId;
+        }
+
+        public Long getProductId() {
+            return productId;
+        }
+
+        public void setProductId(Long productId) {
+            this.productId = productId;
+        }
+
+        public int getRating() {
+            return rating;
+        }
+
+        public void setRating(int rating) {
+            this.rating = rating;
+        }
+
+        public String getComment() {
+            return comment;
+        }
+
+        public void setComment(String comment) {
+            this.comment = comment;
+        }
     }
 
     public static class ChangePasswordRequest {
@@ -563,35 +590,73 @@ public class CustomerRestController {
         private String newPassword;
         private String confirmPassword;
 
-        public String getCurrentPassword() { return currentPassword; }
-        public void setCurrentPassword(String currentPassword) { this.currentPassword = currentPassword; }
-        public String getNewPassword() { return newPassword; }
-        public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
-        public String getConfirmPassword() { return confirmPassword; }
-        public void setConfirmPassword(String confirmPassword) { this.confirmPassword = confirmPassword; }
+        public String getCurrentPassword() {
+            return currentPassword;
+        }
+
+        public void setCurrentPassword(String currentPassword) {
+            this.currentPassword = currentPassword;
+        }
+
+        public String getNewPassword() {
+            return newPassword;
+        }
+
+        public void setNewPassword(String newPassword) {
+            this.newPassword = newPassword;
+        }
+
+        public String getConfirmPassword() {
+            return confirmPassword;
+        }
+
+        public void setConfirmPassword(String confirmPassword) {
+            this.confirmPassword = confirmPassword;
+        }
     }
 
     public static class EmailChangeRequest {
         private String newEmail;
 
-        public String getNewEmail() { return newEmail; }
-        public void setNewEmail(String newEmail) { this.newEmail = newEmail; }
+        public String getNewEmail() {
+            return newEmail;
+        }
+
+        public void setNewEmail(String newEmail) {
+            this.newEmail = newEmail;
+        }
     }
 
     public static class EmailVerificationRequest {
         private String newEmail;
         private String otp;
 
-        public String getNewEmail() { return newEmail; }
-        public void setNewEmail(String newEmail) { this.newEmail = newEmail; }
-        public String getOtp() { return otp; }
-        public void setOtp(String otp) { this.otp = otp; }
+        public String getNewEmail() {
+            return newEmail;
+        }
+
+        public void setNewEmail(String newEmail) {
+            this.newEmail = newEmail;
+        }
+
+        public String getOtp() {
+            return otp;
+        }
+
+        public void setOtp(String otp) {
+            this.otp = otp;
+        }
     }
 
     public static class NewsletterRequest {
         private boolean optIn;
 
-        public boolean isOptIn() { return optIn; }
-        public void setOptIn(boolean optIn) { this.optIn = optIn; }
+        public boolean isOptIn() {
+            return optIn;
+        }
+
+        public void setOptIn(boolean optIn) {
+            this.optIn = optIn;
+        }
     }
 }

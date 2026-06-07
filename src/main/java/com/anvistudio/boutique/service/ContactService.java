@@ -20,6 +20,7 @@ public class ContactService {
 
     /**
      * Saves a new customer query to the database.
+     * 
      * @param message The ContactMessage object submitted by the user.
      * @return The persisted ContactMessage object.
      */
@@ -34,7 +35,8 @@ public class ContactService {
      */
     public List<ContactMessage> getAllMessages() {
         // Fetch ordered by submission date (newest first)
-        return contactRepository.findAll(); // Assuming default repository query orders correctly or we manually sort later
+        return contactRepository.findAll(); // Assuming default repository query orders correctly or we manually sort
+                                            // later
     }
 
     /**

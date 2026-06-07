@@ -42,7 +42,8 @@ public class CartItem {
      * CRITICAL FIX: Uses the discounted price from the Product entity.
      */
     public double getTotalPrice() {
-        // Use doubleValue() for arithmetic, relying on Product to handle BigDecimal precision.
+        // Use doubleValue() for arithmetic, relying on Product to handle BigDecimal
+        // precision.
         return this.product.getDiscountedPrice().doubleValue() * this.quantity;
     }
 }
