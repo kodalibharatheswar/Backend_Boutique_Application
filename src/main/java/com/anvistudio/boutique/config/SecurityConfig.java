@@ -61,14 +61,23 @@ public class SecurityConfig {
     @Autowired
     private UserRepository userRepository;
 
-    @Value("${jwt.expiration:3600000}")
-    private long jwtExpiration;
-
     @Value("${app.oauth2.success-redirect-url:http://localhost:3000/oauth2/redirect}")
     private String oauth2SuccessRedirectUrl;
 
     @Value("${app.oauth2.failure-redirect-url:http://localhost:3000/login?error=oauth2}")
     private String oauth2FailureRedirectUrl;
+
+    @Value("${frontend.url:http://localhost:3000}")
+    private String frontendUrl;
+
+    /**
+     * Bean to handle X-Forwarded-* headers from Nginx.
+     * This is crucial for preventing redirect loops when behind a proxy.
+     */
+    @Bean
+    public org.springframework.web.filter.ForwardedHeaderFilter forwardedHeaderFilter() {
+        return new org.springframework.web.filter.ForwardedHeaderFilter();
+    }
 
     /**
      * Expose AuthenticationManager as a Bean.
@@ -104,7 +113,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:*", "https://*"));
+        config.setAllowedOrigins(List.of(frontendUrl, "http://localhost:3000"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
